@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 const sourceFiles = [
-  { title: "기본 모델(6개)", file: "/model-manuals/model-usage.html" },
-  { title: "추가 모델(5개)", file: "/model-manuals/additional-model-usage.html" },
-  { title: "전문/보안 모델(7개)", file: "/model-manuals/ur-un-tp-lockkey-security.html" },
-  { title: "CS 처리 매뉴얼", file: "/model-manuals/cs-manual.html" },
+  { title: "기본 모델(6개)", file: "/manuals/model-usage.html" },
+  { title: "추가 모델(5개)", file: "/manuals/additional-model-usage.html" },
+  { title: "전문/보안 모델(7개)", file: "/manuals/ur-un-tp-lockkey-security.html" },
+  { title: "CS 처리 매뉴얼", file: "/manuals/cs-manual.html" },
 ];
 
 export const Route = createFileRoute("/model-manuals")({
@@ -91,10 +91,10 @@ function ModelManualsPage() {
     const load = async () => {
       try {
         const [modelUsage, additionalUsage, urUnTp, csHtmlText] = await Promise.all([
-          fetch("/model-manuals/model-usage.html").then((res) => res.text()),
-          fetch("/model-manuals/additional-model-usage.html").then((res) => res.text()),
-          fetch("/model-manuals/ur-un-tp-lockkey-security.html").then((res) => res.text()),
-          fetch("/model-manuals/cs-manual.html").then((res) => res.text()),
+          fetch("/manuals/model-usage.html").then((res) => res.text()),
+          fetch("/manuals/additional-model-usage.html").then((res) => res.text()),
+          fetch("/manuals/ur-un-tp-lockkey-security.html").then((res) => res.text()),
+          fetch("/manuals/cs-manual.html").then((res) => res.text()),
         ]);
 
         const groups: ManualGroup[] = [
@@ -215,9 +215,9 @@ function ModelManualsPage() {
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {sourceFiles.slice(0, 3).map((source) => (
-              <Link key={source.file} to={source.file} style={{ color: "var(--teal-ultra)", textDecoration: "underline", fontSize: 13 }}>
+              <a key={source.file} href={source.file} target="_blank" rel="noreferrer" style={{ color: "var(--teal-ultra)", textDecoration: "underline", fontSize: 13 }}>
                 {source.title} 원본 보기
-              </Link>
+              </a>
             ))}
           </div>
         </div>
@@ -241,9 +241,9 @@ function ModelManualsPage() {
               상담 처리 워크플로우, 자가조치, 유무상, 증상별 응대 가이드까지 한 번에 확인하세요.
             </p>
           </div>
-          <Link to="/model-manuals/cs-manual.html" style={{ color: "var(--teal-ultra)", textDecoration: "underline", fontSize: 13 }}>
+          <a href="/manuals/cs-manual.html" target="_blank" rel="noreferrer" style={{ color: "var(--teal-ultra)", textDecoration: "underline", fontSize: 13 }}>
             원본 CS 매뉴얼 보기
-          </Link>
+          </a>
         </div>
 
         <div style={{ marginTop: 18 }} dangerouslySetInnerHTML={{ __html: csHtml }} />
