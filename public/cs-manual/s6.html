@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>모델 특이사항 - 유니코 CS</title><style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,sans-serif;background:#eef2f3;color:#1a2526;line-height:1.55}
+.top{background:linear-gradient(135deg,#0D4A55,#2E8B9A);color:#fff;padding:26px 22px 18px}
+.top h1{margin:0 0 4px;font-size:22px}.top p{margin:0;opacity:.85;font-size:13px}
+.stat{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap}
+.stat div{background:rgba(255,255,255,.13);padding:7px 13px;border-radius:8px;font-size:12.5px}.stat b{font-size:17px;display:block}
+nav{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #d6dee0;padding:9px 16px;display:flex;gap:6px;flex-wrap:wrap;box-shadow:0 2px 5px rgba(0,0,0,.04)}
+nav a{font-size:12.5px;color:#33484b;text-decoration:none;padding:5px 11px;border-radius:16px;background:#f1f5f6;white-space:nowrap}
+nav a:hover{background:#0D4A55;color:#fff}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 22px 70px}
+section{margin-bottom:34px;scroll-margin-top:60px}
+h2.sh{font-size:19px;color:#0D4A55;border-left:5px solid #2E8B9A;padding-left:11px;margin:0 0 14px}
+h3.sub{font-size:15px;color:#2E8B9A;margin:18px 0 8px}
+table.t{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+table.t th{background:#0D4A55;color:#fff;text-align:left;padding:8px 12px;font-size:12px}
+table.t td{padding:8px 12px;border-bottom:1px solid #eef2f3}
+table.t tr:last-child td{border-bottom:none}
+table.t td.m,table.t td:first-child.m{font-weight:700;color:#0D4A55;font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box{background:#fff;border-radius:9px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.box.free{border-top:4px solid #2E8B9A}.box.paid{border-top:4px solid #C8A96E}
+.box h4{margin:0 0 8px;font-size:14px}.box ul{margin:0;padding-left:18px;font-size:12.5px}
+.wf{display:flex;gap:10px;background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:7px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.wf-k{font-weight:700;color:#2E8B9A;white-space:nowrap;font-size:13px}.wf-v{font-size:13px}
+.guide{background:#fff;border-radius:9px;padding:12px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.guide h4{margin:0 0 6px;color:#0D4A55;font-size:14px}.guide ol{margin:0;padding-left:20px;font-size:13px}.guide li{margin:2px 0}
+.search{width:100%;max-width:440px;padding:10px 14px;border:1.5px solid #cdd8da;border-radius:9px;font-size:14px;outline:none;margin-bottom:14px}
+.search:focus{border-color:#2E8B9A}
+.ccard{background:#fff;border-radius:9px;margin-bottom:9px;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow:hidden}
+.ccard-h{display:flex;align-items:center;gap:9px;padding:12px 15px;cursor:pointer}
+.cnum{font-size:11px;font-weight:700;color:#fff;background:#2E8B9A;padding:2px 7px;border-radius:5px}
+.cname{font-weight:700;color:#0D4A55;font-size:15px}.cmeta{margin-left:auto;font-size:12px;color:#7a8a8c}
+.caret{transition:.2s;color:#7a8a8c}.ccard.open .caret{transform:rotate(180deg)}
+.ccard-b{display:none;padding:0 15px 15px;font-size:13px}.ccard.open .ccard-b{display:block}
+.meta-line{font-size:11.5px;color:#777;background:#f4f8f9;border-left:3px solid #2E8B9A;padding:5px 9px;margin-bottom:9px;border-radius:0 4px 4px 0}
+.def,.sec,.row2,.note,.sample{margin:7px 0}
+.def b,.sec b,.cost b,.note b{color:#0D4A55;display:inline}
+.sec ul{margin:4px 0 0;padding-left:18px}.sec li{margin:2px 0}
+.flow{font-style:italic;color:#33484b;background:#f7fafb;padding:5px 9px;border-radius:5px;margin:3px 0;font-size:12.5px}
+.note{background:#fbf8f1;padding:7px 10px;border-radius:6px}
+.sample{background:#eef6f7;padding:7px 10px;border-radius:6px;font-size:12px;color:#33484b}.sample b{color:#2E8B9A}
+.sccard{background:#fff;border-radius:9px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sccard h4{margin:0 0 3px;color:#0D4A55;font-size:15px}
+.sc-sub{font-size:12px;color:#8a6d2b;background:#fbf8f1;border-left:3px solid #C8A96E;padding:4px 9px;border-radius:0 4px 4px 0;margin-bottom:10px;display:inline-block}
+.dl{display:flex;gap:8px;margin:5px 0;font-size:13px}
+.dl .rl{font-weight:700;min-width:42px}.dl.c .rl{color:#8a6d2b}.dl.s .rl{color:#2E8B9A}
+.dl.c .tx{color:#444}.dl.s .tx{color:#1a2526}
+.tm{display:inline-block;background:#fff;border:1px solid #dde5e7;border-radius:6px;padding:4px 9px;margin:3px;font-size:12px}
+.tm b{color:#2E8B9A}
+.empty{text-align:center;color:#8a9a9c;padding:30px}
+@media(max-width:640px){.two{grid-template-columns:1fr}}
+</style></head><body><div class="wrap"><section id="s6"><h2 class="sh">6. 모델별 특이사항 (단종·수리불가·교체전용)</h2>
+<p style="font-size:13px">아래 모델은 단종·부품수급 불가로 동급 최신 모델 파손교체 처리. 접수 시 「수리 불가, 교체만 가능」 사전 고지.</p>
+<table class="t"><tr><th>모델</th><th>처리 메모(상담이력 근거)</th></tr><tr><td class="m">UN-6700S-F</td><td>un-6700s-f-goldclass/ 구미산동읍 신당3로 15 골드디움 교체만25+연동기10</td></tr><tr><td class="m">UN-220D-GL</td><td>UN-220S-GL/수리불가 교체18안내</td></tr><tr><td class="m">ST200</td><td>st200 고장/ 교체만가능</td></tr><tr><td class="m">UN-3000D</td><td>UN-3000 /삐리릭소리나면서 잠금안됨/사진상 부품없을수 있는제품으로 기기교체만가능비용안내/임대인과 상의후 재연락예정/접수x UN-3000 교체만가능 21만원</td></tr><tr><td class="m">KDL-3250S</td><td>KDL-3250S/ 비디오폰 / 기기교체만가능안내/비용안내/구형 통신팩만 구매가능한지</td></tr><tr><td class="m">UN-3150S</td><td>un-3150s 고장. 수리불가 교체 21만원</td></tr><tr><td class="m">320S-GL</td><td>320S-GL/수리불가 교체18안내/ 비밀번호분실음</td></tr><tr><td class="m">UN-3200S</td><td>상담사님께서는 해당 모델이 단종되어 수리(AS) 대신 제품 교체가 필요함을 안내하였습니다. 현재 접수 시 교체 비용은 24만 원이며, 이는 제품 가격과 설치 서비</td></tr><tr><td class="m">UN-6500S-ROYAL</td><td>상담사님께서는 해당 도어락 모델이 단종되어 부품 수급이 어렵고 키패드 고장으로 인해 수리가 불가능함을 안내하며, 제품 교체가 필요함을 설명하였습니다. 이후 고객님</td></tr><tr><td class="m">PM900V</td><td>pm900V 안전잠금버튼 반응없음. 수리안됨교체만가능. 4~5년 / 8~교체비용 30~40만원안내</td></tr><tr><td class="m">UN-6700S</td><td>해당 모델은 단종되어 수리가 불가능하며, 현장에서 제품 파손 후 동일 급의 최신 모델로 교체해야 함을 안내드렸습니다. 교체 비용은 25만 원이며, 기사님이 방문 </td></tr><tr><td class="m">JU-300</td><td>ju300 수리불가/ 유리문교체비용 18만원</td></tr><tr><td class="m">R600-S</td><td>r600-s 번호판 깜박임. 2020-07제조 / 교체만가능수리비용 10만원 안내</td></tr><tr><td class="m">JM-640D</td><td>JM-640/ 먹통/기기교체만가능안내(25만원)유상</td></tr><tr><td class="m">UN-7200B</td><td>짱그마k2 조기방전 수리불가 교체필요</td></tr><tr><td class="m">JM-650D</td><td>jm650 고장. 점검~ 교체만 가능</td></tr><tr><td class="m">JM-650S</td><td>jm650 고장. 점검~ 교체만 가능</td></tr><tr><td class="m">UN-3250D</td><td>3250d 수리불가</td></tr><tr><td class="m">XG-2(조이락 기타단종)</td><td>XG-2/수리불가 교체안내/ 교체21</td></tr><tr><td class="m">UN-3250S</td><td>atlas/도어락에서 계속 삑 삑 하는 소리남/ 교체만가능 21만원안내</td></tr><tr><td class="m">JM-600</td><td>jm600, 교체만 가능함 25만원</td></tr><tr><td class="m">JM-670S</td><td>대전 평화로운 아파트JM670D/ 교체만 가능25</td></tr><tr><td class="m">XG-3</td><td>xg-3 / 수리불가</td></tr><tr><td class="m">UN-320S(오리온)</td><td>320gl 경보음/ 수리불가 교체필요교체비용 18만원</td></tr></table>
+<h3 class="sub">최다 접수 모델</h3><div><span class="tm">8000FS <b>537</b></span><span class="tm">KDL-P8100S <b>232</b></span><span class="tm">8600FS <b>150</b></span><span class="tm">5500S <b>116</b></span><span class="tm">8600S <b>107</b></span><span class="tm">GALAXIA-F <b>94</b></span><span class="tm">UN-6700S <b>93</b></span><span class="tm">7100S <b>84</b></span><span class="tm">GT100 <b>81</b></span><span class="tm">TM-3200S <b>79</b></span><span class="tm">IDL-400M <b>77</b></span><span class="tm">TP-8000 <b>73</b></span><span class="tm">UM-3500S <b>73</b></span><span class="tm">UN-3150S <b>72</b></span><span class="tm">NDL-PP11 <b>68</b></span><span class="tm">GT200 <b>67</b></span></div></section></div></body></html>

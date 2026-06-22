@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>워크플로우 - 유니코 CS</title><style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,sans-serif;background:#eef2f3;color:#1a2526;line-height:1.55}
+.top{background:linear-gradient(135deg,#0D4A55,#2E8B9A);color:#fff;padding:26px 22px 18px}
+.top h1{margin:0 0 4px;font-size:22px}.top p{margin:0;opacity:.85;font-size:13px}
+.stat{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap}
+.stat div{background:rgba(255,255,255,.13);padding:7px 13px;border-radius:8px;font-size:12.5px}.stat b{font-size:17px;display:block}
+nav{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #d6dee0;padding:9px 16px;display:flex;gap:6px;flex-wrap:wrap;box-shadow:0 2px 5px rgba(0,0,0,.04)}
+nav a{font-size:12.5px;color:#33484b;text-decoration:none;padding:5px 11px;border-radius:16px;background:#f1f5f6;white-space:nowrap}
+nav a:hover{background:#0D4A55;color:#fff}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 22px 70px}
+section{margin-bottom:34px;scroll-margin-top:60px}
+h2.sh{font-size:19px;color:#0D4A55;border-left:5px solid #2E8B9A;padding-left:11px;margin:0 0 14px}
+h3.sub{font-size:15px;color:#2E8B9A;margin:18px 0 8px}
+table.t{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+table.t th{background:#0D4A55;color:#fff;text-align:left;padding:8px 12px;font-size:12px}
+table.t td{padding:8px 12px;border-bottom:1px solid #eef2f3}
+table.t tr:last-child td{border-bottom:none}
+table.t td.m,table.t td:first-child.m{font-weight:700;color:#0D4A55;font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box{background:#fff;border-radius:9px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.box.free{border-top:4px solid #2E8B9A}.box.paid{border-top:4px solid #C8A96E}
+.box h4{margin:0 0 8px;font-size:14px}.box ul{margin:0;padding-left:18px;font-size:12.5px}
+.wf{display:flex;gap:10px;background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:7px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.wf-k{font-weight:700;color:#2E8B9A;white-space:nowrap;font-size:13px}.wf-v{font-size:13px}
+.guide{background:#fff;border-radius:9px;padding:12px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.guide h4{margin:0 0 6px;color:#0D4A55;font-size:14px}.guide ol{margin:0;padding-left:20px;font-size:13px}.guide li{margin:2px 0}
+.search{width:100%;max-width:440px;padding:10px 14px;border:1.5px solid #cdd8da;border-radius:9px;font-size:14px;outline:none;margin-bottom:14px}
+.search:focus{border-color:#2E8B9A}
+.ccard{background:#fff;border-radius:9px;margin-bottom:9px;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow:hidden}
+.ccard-h{display:flex;align-items:center;gap:9px;padding:12px 15px;cursor:pointer}
+.cnum{font-size:11px;font-weight:700;color:#fff;background:#2E8B9A;padding:2px 7px;border-radius:5px}
+.cname{font-weight:700;color:#0D4A55;font-size:15px}.cmeta{margin-left:auto;font-size:12px;color:#7a8a8c}
+.caret{transition:.2s;color:#7a8a8c}.ccard.open .caret{transform:rotate(180deg)}
+.ccard-b{display:none;padding:0 15px 15px;font-size:13px}.ccard.open .ccard-b{display:block}
+.meta-line{font-size:11.5px;color:#777;background:#f4f8f9;border-left:3px solid #2E8B9A;padding:5px 9px;margin-bottom:9px;border-radius:0 4px 4px 0}
+.def,.sec,.row2,.note,.sample{margin:7px 0}
+.def b,.sec b,.cost b,.note b{color:#0D4A55;display:inline}
+.sec ul{margin:4px 0 0;padding-left:18px}.sec li{margin:2px 0}
+.flow{font-style:italic;color:#33484b;background:#f7fafb;padding:5px 9px;border-radius:5px;margin:3px 0;font-size:12.5px}
+.note{background:#fbf8f1;padding:7px 10px;border-radius:6px}
+.sample{background:#eef6f7;padding:7px 10px;border-radius:6px;font-size:12px;color:#33484b}.sample b{color:#2E8B9A}
+.sccard{background:#fff;border-radius:9px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sccard h4{margin:0 0 3px;color:#0D4A55;font-size:15px}
+.sc-sub{font-size:12px;color:#8a6d2b;background:#fbf8f1;border-left:3px solid #C8A96E;padding:4px 9px;border-radius:0 4px 4px 0;margin-bottom:10px;display:inline-block}
+.dl{display:flex;gap:8px;margin:5px 0;font-size:13px}
+.dl .rl{font-weight:700;min-width:42px}.dl.c .rl{color:#8a6d2b}.dl.s .rl{color:#2E8B9A}
+.dl.c .tx{color:#444}.dl.s .tx{color:#1a2526}
+.tm{display:inline-block;background:#fff;border:1px solid #dde5e7;border-radius:6px;padding:4px 9px;margin:3px;font-size:12px}
+.tm b{color:#2E8B9A}
+.empty{text-align:center;color:#8a9a9c;padding:30px}
+@media(max-width:640px){.two{grid-template-columns:1fr}}
+</style></head><body><div class="wrap"><section id="s2"><h2 class="sh">2. CS 표준 처리 워크플로우</h2><div class="wf"><span class="wf-k">① 접수</span><span class="wf-v">웹페이지/전화/채팅으로 증상·모델명·주소·연락처 접수. 모델 불명 시 영문 모델명/KC 스티커 사진 문자 요청.</span></div><div class="wf"><span class="wf-k">② 1차 분류·판정</span><span class="wf-v">증상 분류 → 모델 확인 → 무상·유상 1차 판정. 타사·관할 외 모델은 이관.</span></div><div class="wf"><span class="wf-k">③ 자가조치 안내</span><span class="wf-v">9V 비상개문·리셋·건전지 교체·자동잠금 재설정 등 1차 자가조치. 해결 시 상담처리 완료.</span></div><div class="wf"><span class="wf-k">④ 지점·기사 배정 (OB)</span><span class="wf-v">담당자가 지역 기사 배정 → 기사 방문 전 사전연락(영업일 30분~1시간, 야간/원거리는 익일).</span></div><div class="wf"><span class="wf-k">⑤ 방문·현장 조치</span><span class="wf-v">현장 점검 → 무상 수리 또는 유상 수리/파손 교체. 현장 카드/계좌이체 결제.</span></div><div class="wf"><span class="wf-k">⑥ 처리결과 회신</span><span class="wf-v">처리내용·결과를 티켓에 기록하고 고객 회신.</span></div><div class="wf"><span class="wf-k">⑦ 완료처리</span><span class="wf-v">정상 종결=완료(해결), 재연락·이관=닫힘(보류).</span></div>
+<p style="font-size:13px;font-weight:700;color:#0D4A55;margin-top:10px">예시: 접수 → 지점 OB(배차) → 기사 방문·처리 → 처리결과 회신 → 완료처리</p></section></div></body></html>

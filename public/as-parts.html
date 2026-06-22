@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>유니코 도어락 · 모델별 AS 자재 / 교체사유 참조표</title>
+<style>
+*{box-sizing:border-box} 
+body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,sans-serif;background:#eef2f3;color:#1a2526}
+.top{background:linear-gradient(135deg,#0D4A55,#2E8B9A);color:#fff;padding:26px 22px 20px}
+.top h1{margin:0 0 4px;font-size:22px} .top p{margin:0;opacity:.85;font-size:13px}
+.stat{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap}
+.stat div{background:rgba(255,255,255,.13);padding:8px 14px;border-radius:8px;font-size:13px}
+.stat b{font-size:18px;display:block}
+.bar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #d6dee0;padding:12px 22px;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.bar input{width:100%;max-width:420px;padding:10px 14px;border:1.5px solid #cdd8da;border-radius:9px;font-size:14px;outline:none}
+.bar input:focus{border-color:#2E8B9A}
+.chips{margin-top:10px;display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1.5px solid #cdd8da;background:#fff;border-radius:20px;padding:5px 12px;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:6px;color:#33484b}
+.chip.on{background:#0D4A55;color:#fff;border-color:#0D4A55}
+.cdot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.wrap{padding:18px 22px 60px;max-width:1100px;margin:0 auto}
+.card{background:#fff;border:1px solid #dde5e7;border-radius:11px;margin-bottom:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card-h{display:flex;align-items:center;gap:9px;padding:12px 16px;background:#f4f8f9;border-bottom:1px solid #e3eaec;flex-wrap:wrap}
+.mname{font-size:16px;font-weight:700;color:#0D4A55}
+.badge{color:#fff;font-size:11px;font-weight:700;padding:2px 9px;border-radius:5px;letter-spacing:.3px}
+.cnt{margin-left:auto;font-size:12px;color:#7a8a8c}
+table.pt{width:100%;border-collapse:collapse;font-size:13px}
+.pt th{background:#0D4A55;color:#fff;font-weight:600;text-align:left;padding:8px 12px;font-size:12px}
+.pt td{padding:9px 12px;border-bottom:1px solid #eef2f3;vertical-align:top}
+.pt tr:last-child td{border-bottom:none}
+.bu-chip{color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:5px;white-space:nowrap;display:inline-block}
+.code{font-family:'Consolas',monospace;font-size:12px;color:#0D4A55;font-weight:700;cursor:pointer;white-space:nowrap}
+.code:hover{text-decoration:underline}
+.name{color:#2a3a3c} .spec{font-size:11px;color:#8a9a9c;margin-top:2px}
+.reason{color:#3a4a4c;line-height:1.55}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.dot.real{background:#27ae60} .dot.gen{background:#bbb}
+.legend{font-size:11.5px;color:#7a8a8c;margin-top:8px}
+.legend .dot{margin:0 4px 0 10px}
+.empty{text-align:center;color:#8a9a9c;padding:40px;font-size:14px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0D4A55;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;transition:.2s;pointer-events:none}
+.toast.show{opacity:1}
+@media(max-width:640px){.pt th:nth-child(3),.pt td.name{display:none}}
+</style></head>
+<body>
+<div class="top">
+  <h1>🔐 유니코 도어락 · 모델별 AS 자재 / 교체사유 참조표</h1>
+  <p>AS 전산 품목목록(AS 서비스 자재) × 상담 AS이력 4,273건 교체사유 결합 · 가격 제외</p>
+  <div class="stat">
+    <div><b>64</b>모델</div>
+    <div><b>89</b>AS 자재</div>
+    <div><b>6</b>부위 분류</div>
+    <div><b>4,273</b>건 이력 분석</div>
+  </div>
+</div>
+<div class="bar">
+  <input id="q" placeholder="🔍 모델명 · 품목코드 · 품목명 검색 (예: 8000FS, 400-S-P8100, 모티스)" oninput="filter()">
+  <div class="chips"><button class="chip on" data-bu="ALL" onclick="toggleBu(this)">전체</button><button class="chip" data-bu="모티스" onclick="toggleBu(this)"><span class="cdot" style="background:#C0392B"></span>모티스</button><button class="chip" data-bu="내측 ASSY(메인바디)" onclick="toggleBu(this)"><span class="cdot" style="background:#1E8449"></span>내측 ASSY(메인바디)</button><button class="chip" data-bu="메인PCB(내측기판)" onclick="toggleBu(this)"><span class="cdot" style="background:#8E44AD"></span>메인PCB(내측기판)</button><button class="chip" data-bu="외측 ASSY(프론트바디)" onclick="toggleBu(this)"><span class="cdot" style="background:#2E86C1"></span>외측 ASSY(프론트바디)</button><button class="chip" data-bu="키패드PCB(외측기판)" onclick="toggleBu(this)"><span class="cdot" style="background:#1F8FA3"></span>키패드PCB(외측기판)</button><button class="chip" data-bu="안테나PCB" onclick="toggleBu(this)"><span class="cdot" style="background:#B9770E"></span>안테나PCB</button></div>
+  <div class="legend">교체사유 표시: <span class="dot real"></span>해당 모델 AS이력 실데이터 &nbsp; <span class="dot gen"></span>부위별 표준 교체패턴 &nbsp;|&nbsp; 품목코드 클릭 시 복사</div>
+</div>
+<div class="wrap" id="wrap">
+<div class="card" data-model="8000fs" data-codes="300-s-0181-18-as 300-s-0181-18-as-np 300-s-0181-33-as 300-s-0181-33-as-np 400-s-p8000-023-as 400-s-p8000-031-as 400-s-p8000-043-as 400-s-p8000-078-as" data-names="as-8000fs dark gray 내측assy as-8000fs dark gray 내측assy as-8000fs m.gold 내측assy as-8000fs m.gold 내측assy as-8000fs d.gray assy as-8000fs unicoer d.gray assy as-8000fs unicor m.gold assy as-8000fs unicor m.gold assy (info pba 미적용)" data-bus="내측 ASSY(메인바디) 외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">8000FS</span><span class="badge" style="background:#2E8B9A">UNICOR</span><span class="cnt">8개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-0181-18-AS</td>
+          <td class="name">AS-8000FS Dark Gray 내측ASSY<div class="spec">Dark Gray</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>데드볼트문제(1) · 조기방전(1) · 터치문제(1) · 잠금문제(1) · 등록버튼문제(1) · 먹통(1)</td>
+        </tr><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-0181-18-AS-NP</td>
+          <td class="name">AS-8000FS Dark Gray 내측ASSY<div class="spec">Dark Gray / PBA제외</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>데드볼트문제(1) · 조기방전(1) · 터치문제(1) · 잠금문제(1) · 등록버튼문제(1) · 먹통(1)</td>
+        </tr><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-0181-33-AS</td>
+          <td class="name">AS-8000FS M.GOLD 내측ASSY<div class="spec">M.GOLD</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>데드볼트문제(1) · 조기방전(1) · 터치문제(1) · 잠금문제(1) · 등록버튼문제(1) · 먹통(1)</td>
+        </tr><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-0181-33-AS-NP</td>
+          <td class="name">AS-8000FS M.GOLD 내측ASSY<div class="spec">M.GOLD / PBA제외</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>데드볼트문제(1) · 조기방전(1) · 터치문제(1) · 잠금문제(1) · 등록버튼문제(1) · 먹통(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-023-AS</td>
+          <td class="name">AS-8000FS D.GRAY ASSY<div class="spec">D.GRAY</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>간헐적소리음발생(13) · 지문문제(12) · 터치문제(3) · 외부에서문안열림(2) · 조기방전(1) · 키패드문제(1) · 전원문제(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-031-AS</td>
+          <td class="name">AS-8000FS UNICOER D.GRAY ASSY<div class="spec">D.GRAY</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>간헐적소리음발생(13) · 지문문제(12) · 터치문제(3) · 외부에서문안열림(2) · 조기방전(1) · 키패드문제(1) · 전원문제(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-043-AS</td>
+          <td class="name">AS-8000FS UNICOR M.GOLD ASSY<div class="spec">M.GOLD</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>간헐적소리음발생(13) · 지문문제(12) · 터치문제(3) · 외부에서문안열림(2) · 조기방전(1) · 키패드문제(1) · 전원문제(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-078-AS</td>
+          <td class="name">AS-8000FS UNICOR M.GOLD ASSY (INFO PBA 미적용)<div class="spec">M.GOLD</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>간헐적소리음발생(13) · 지문문제(12) · 터치문제(3) · 외부에서문안열림(2) · 조기방전(1) · 키패드문제(1) · 전원문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="7100s" data-codes="300-s-7100-001-as s0m-e-7100-001-as 400-s-7100-001-as" data-names="as-assy inbody as-7100s pba main(a31l123cl) as-7100s m.gold out body assy" data-bus="내측 ASSY(메인바디) 메인PCB(내측기판) 외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">7100S</span><span class="cnt">3개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-7100-001-AS</td>
+          <td class="name">AS-ASSY INBODY</td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>자동잠금문제(1)</td>
+        </tr><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0M-E-7100-001-AS</td>
+          <td class="name">AS-7100S PBA MAIN(A31L123CL)</td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>조기방전(2) · 외부에서문안열림(1) · 간헐적소리음발생(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-7100-001-AS</td>
+          <td class="name">AS-7100S M.Gold OUT BODY ASSY<div class="spec">M.Gold</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>조기방전(2) · 외부에서문안열림(2) · 간헐적소리음발생(1) · 자동잠금문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="8000s" data-codes="300-s-0181-24-as 400-s-p8000-060-as 400-s-p8000-079-as" data-names="as-8000s dark gray 내측assy as-8000s d.gray assy as-8000s d.gray assy(kdl-p8000s, info pba 미적용)" data-bus="내측 ASSY(메인바디) 외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">8000S</span><span class="cnt">3개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-0181-24-AS</td>
+          <td class="name">AS-8000S Dark Gray 내측ASSY<div class="spec">Dark Gray</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>자동잠금문제(1) · 잠금문제(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-060-AS</td>
+          <td class="name">AS-8000S D.Gray ASSY<div class="spec">D.Gray</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>핸들문제(1) · 데드볼트문제(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-079-AS</td>
+          <td class="name">AS-8000S D.Gray ASSY(KDL-P8000S, INFO PBA 미적용)<div class="spec">D.Gray</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>핸들문제(1) · 데드볼트문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="kdl-p8100s" data-codes="300-s-p8100-003-as 400-s-p8100-004-as 400-s-p8100-005-as" data-names="as-kdl-p8100s black assy in body as-kdl-p8100s d.gray asssy as-kdl-p8100s black알사출 assy" data-bus="내측 ASSY(메인바디) 외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">KDL-P8100S</span><span class="badge" style="background:#34495E">KOCOM</span><span class="cnt">3개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-P8100-003-AS</td>
+          <td class="name">AS-KDL-P8100S BLACK ASSY IN BODY<div class="spec">BLACK</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>카드문제(2) · 외부에서문안열림(2) · 터치문제(1) · 자동잠금문제(1) · 먹통(1) · 건전지문제(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8100-004-AS</td>
+          <td class="name">AS-KDL-P8100S D.Gray ASSSY<div class="spec">D.Gray</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>외부에서문안열림(33) · 먹통(14) · 터치문제(12) · 카드문제(4) · 키패드문제(3) · 결로(3) · 비밀번호분실(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8100-005-AS</td>
+          <td class="name">AS-KDL-P8100S Black알사출 ASSY<div class="spec">Black</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>외부에서문안열림(33) · 먹통(14) · 터치문제(12) · 카드문제(4) · 키패드문제(3) · 결로(3) · 비밀번호분실(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="3500s" data-codes="s0m-e-3500-005-as s0f-e-3500-005-as" data-names="as-3500s pba main(a31l123cl) as-3500s pba key (gtx314l+ra10)" data-bus="메인PCB(내측기판) 키패드PCB(외측기판)">
+      <div class="card-h"><span class="mname">3500S</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0M-E-3500-005-AS</td>
+          <td class="name">AS-3500S PBA MAIN(A31L123CL)</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>먹통(전원 무반응) · 간헐적 소리음/멜로디 · 조기방전 · 터치/지문 인식 이상 · 키패드 입력 이상</td>
+        </tr><tr data-bu="키패드PCB(외측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#1F8FA3">키패드PCB(외측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0F-E-3500-005-AS</td>
+          <td class="name">AS-3500S PBA KEY (GTX314L+RA10)</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 키패드 일부 미입력 · 지문 인식불량</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="550s" data-codes="s0f-e-0550-005-as s0a-e-0500-003-as" data-names="as-pba key [550s,550s-sa(gtx314l+ra10)] as-pba ant [550s,s-gl,s-sa공용, v4]" data-bus="안테나PCB 키패드PCB(외측기판)">
+      <div class="card-h"><span class="mname">550S</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="키패드PCB(외측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#1F8FA3">키패드PCB(외측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0F-E-0550-005-AS</td>
+          <td class="name">AS-PBA KEY [550S,550S-SA(GTX314L+RA10)]</td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>키패드문제(1)</td>
+        </tr><tr data-bu="안테나PCB">
+          <td class="bu"><span class="bu-chip" style="background:#B9770E">안테나PCB</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0A-E-0500-003-AS</td>
+          <td class="name">AS-PBA ANT [550S,S-GL,S-SA공용, V4]</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>먹통(전원 무반응) · 간헐적 소리음/멜로디 · 조기방전 · 터치/지문 인식 이상 · 키패드 입력 이상</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="7500s" data-codes="300-s-m15-029-as-np 400-s-9050-010-as" data-names="as-7500s 내측 assy as-7500s chrome assy" data-bus="내측 ASSY(메인바디) 외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">7500S</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-M15-029-AS-NP</td>
+          <td class="name">AS-7500S 내측 ASSY<div class="spec">PBA제외</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>키패드문제(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-9050-010-AS</td>
+          <td class="name">AS-7500S Chrome ASSY<div class="spec">Chrome</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>윈도우문제(1) · 키패드문제(1) · 터치문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="8600fs" data-codes="400-s-p8600-006-as 400-s-p8600-008-as" data-names="as-masters 8600fs chrome,단방향 assy as-masters 8600fs m.gold 단방향 assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">8600FS</span><span class="badge" style="background:#0D4A55">MASTERS</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8600-006-AS</td>
+          <td class="name">AS-MASTERS 8600FS Chrome,단방향 ASSY<div class="spec">Chrome / 단방향</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>지문문제(27) · 간헐적소리음발생(8) · 조기방전(3) · 먹통(2) · 키패드문제(1) · 터치문제(1) · 경보음발생(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8600-008-AS</td>
+          <td class="name">AS-MASTERS 8600FS M.Gold 단방향 ASSY<div class="spec">M.Gold / 단방향</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>지문문제(27) · 간헐적소리음발생(8) · 조기방전(3) · 먹통(2) · 키패드문제(1) · 터치문제(1) · 경보음발생(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="epah-mecha 공용" data-codes="080-p-0010-a01-as 080-p-0010-a02-as" data-names="as-mortise assy as-mortise assy" data-bus="모티스">
+      <div class="card-h"><span class="mname">EPAH-MECHA 공용</span><span class="badge" style="background:#566573">공용</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="모티스">
+          <td class="bu"><span class="bu-chip" style="background:#C0392B">모티스</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">080-P-0010-A01-AS</td>
+          <td class="name">AS-MORTISE ASSY</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외부에서 문 안열림 · 내부에서 문 안열림 · 데드볼트 동작이상 · 자동잠금 안됨 · 잠금 안됨 · 모티스 소음/걸림</td>
+        </tr><tr data-bu="모티스">
+          <td class="bu"><span class="bu-chip" style="background:#C0392B">모티스</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">080-P-0010-A02-AS</td>
+          <td class="name">AS-MORTISE ASSY</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외부에서 문 안열림 · 내부에서 문 안열림 · 데드볼트 동작이상 · 자동잠금 안됨 · 잠금 안됨 · 모티스 소음/걸림</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="epu-mecha 공용" data-codes="080-p-0008-a01-as 080-p-0008-a02-as" data-names="as-epu-mecha(cable l=245mm) as-epu-mecha, cable l= 295mm" data-bus="모티스">
+      <div class="card-h"><span class="mname">EPU-MECHA 공용</span><span class="badge" style="background:#566573">공용</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="모티스">
+          <td class="bu"><span class="bu-chip" style="background:#C0392B">모티스</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">080-P-0008-A01-AS</td>
+          <td class="name">AS-EPU-MECHA(CABLE L=245mm)</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외부에서 문 안열림 · 내부에서 문 안열림 · 데드볼트 동작이상 · 자동잠금 안됨 · 잠금 안됨 · 모티스 소음/걸림</td>
+        </tr><tr data-bu="모티스">
+          <td class="bu"><span class="bu-chip" style="background:#C0392B">모티스</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">080-P-0008-A02-AS</td>
+          <td class="name">AS-EPU-MECHA, CABLE L= 295mm</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외부에서 문 안열림 · 내부에서 문 안열림 · 데드볼트 동작이상 · 자동잠금 안됨 · 잠금 안됨 · 모티스 소음/걸림</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="ndl-pp11" data-codes="300-s-0181-23-as-np 400-s-p8000-028-as" data-names="as-ndl-pp11 g.gold 내측assy as-ndl-pp11 c.gold assy" data-bus="내측 ASSY(메인바디) 외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">NDL-PP11</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-0181-23-AS-NP</td>
+          <td class="name">AS-NDL-PP11 G.GOLD 내측ASSY<div class="spec">G.GOLD / PBA제외</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>데드볼트문제(4) · 먹통(1) · 외부에서문안열림(1) · 잠금문제(1)</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-028-AS</td>
+          <td class="name">AS-NDL-PP11 C.GOLD ASSY<div class="spec">C.GOLD</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>외부에서문안열림(4) · 키패드문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="p8000fs" data-codes="300-s-0181-46-as-np bsm-e-p8000-004-as" data-names="as-p8000fs black in body assy as-p8000fs pba main" data-bus="내측 ASSY(메인바디) 메인PCB(내측기판)">
+      <div class="card-h"><span class="mname">P8000FS</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-0181-46-AS-NP</td>
+          <td class="name">AS-P8000FS BLACK IN BODY ASSY<div class="spec">BLACK / PBA제외</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>데드볼트문제(1) · 조기방전(1) · 터치문제(1) · 잠금문제(1) · 등록버튼문제(1) · 먹통(1)</td>
+        </tr><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">BSM-E-P8000-004-AS</td>
+          <td class="name">AS-P8000FS PBA MAIN</td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>간헐적소리음발생(7) · 조기방전(4) · 데드볼트문제(3) · 외부에서문안열림(3) · 지문문제(3) · 터치문제(2) · 잠금문제(2)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="p8100fs" data-codes="300-s-p8100-004-as bsm-e-p8100-004-as" data-names="as-p8100fs black assy in body as-p8100fs pba main(stm8l151c8)" data-bus="내측 ASSY(메인바디) 메인PCB(내측기판)">
+      <div class="card-h"><span class="mname">P8100FS</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-P8100-004-AS</td>
+          <td class="name">AS-P8100FS BLACK ASSY IN BODY<div class="spec">BLACK</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>자동잠금문제(1)</td>
+        </tr><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">BSM-E-P8100-004-AS</td>
+          <td class="name">AS-P8100FS PBA MAIN(STM8L151C8)</td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>외부에서문안열림(4) · 먹통(2) · 자동잠금문제(2) · 조기방전(1) · 더블클릭/투터치(1) · 내부에서문안열림(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="p8500fs" data-codes="bsm-e-p8500-001-as bsf-e-p8500-001-as" data-names="as-p8500fs pba main as-p8500fs pba key (gtx314l+ra10)" data-bus="메인PCB(내측기판) 키패드PCB(외측기판)">
+      <div class="card-h"><span class="mname">P8500FS</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">BSM-E-P8500-001-AS</td>
+          <td class="name">AS-P8500FS PBA MAIN</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>먹통(전원 무반응) · 간헐적 소리음/멜로디 · 조기방전 · 터치/지문 인식 이상 · 키패드 입력 이상</td>
+        </tr><tr data-bu="키패드PCB(외측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#1F8FA3">키패드PCB(외측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">BSF-E-P8500-001-AS</td>
+          <td class="name">AS-P8500FS PBA KEY (GTX314L+RA10)</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 키패드 일부 미입력 · 지문 인식불량</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="p8500s" data-codes="s0m-e-p8500-001-as s0f-e-p8500-001-as" data-names="as-p8500s pba main as-p8500s pba key(gtx314l+ra10)" data-bus="메인PCB(내측기판) 키패드PCB(외측기판)">
+      <div class="card-h"><span class="mname">P8500S</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0M-E-P8500-001-AS</td>
+          <td class="name">AS-P8500S PBA MAIN</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>먹통(전원 무반응) · 간헐적 소리음/멜로디 · 조기방전 · 터치/지문 인식 이상 · 키패드 입력 이상</td>
+        </tr><tr data-bu="키패드PCB(외측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#1F8FA3">키패드PCB(외측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0F-E-P8500-001-AS</td>
+          <td class="name">AS-P8500S PBA KEY(GTX314L+RA10)</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 키패드 일부 미입력 · 지문 인식불량</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="tm-3200s" data-codes="300-s-3200-006-as 400-s-3200-001-as" data-names="as-tm-3200s assy inbody (m24, b2b 내화형) as-tm-3200s assy ouy body" data-bus="내측 ASSY(메인바디) 외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">TM-3200S</span><span class="cnt">2개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-3200-006-AS</td>
+          <td class="name">AS-TM-3200S ASSY INBODY (M24, B2B 내화형)<div class="spec">내화형 B2B</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>내측 핸들 처짐/파손 · 내측 케이스(사출) 파손 · 카드 인식불량 · 내부 개폐 불량</td>
+        </tr><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-3200-001-AS</td>
+          <td class="name">AS-TM-3200S ASSY OUY BODY</td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>키패드문제(3) · 결로(3)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="0330" data-codes="s0f-e-0330-005-as" data-names="as-0330 pba key" data-bus="키패드PCB(외측기판)">
+      <div class="card-h"><span class="mname">0330</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="키패드PCB(외측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#1F8FA3">키패드PCB(외측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0F-E-0330-005-AS</td>
+          <td class="name">AS-0330 PBA KEY</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 키패드 일부 미입력 · 지문 인식불량</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="330s-sa" data-codes="s0m-e-0330sa-005-as" data-names="as-330s-sa pba main[mm]" data-bus="메인PCB(내측기판)">
+      <div class="card-h"><span class="mname">330S-SA</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0M-E-0330SA-005-AS</td>
+          <td class="name">AS-330S-SA PBA MAIN[MM]</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>먹통(전원 무반응) · 간헐적 소리음/멜로디 · 조기방전 · 터치/지문 인식 이상 · 키패드 입력 이상</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="5500s+" data-codes="400-s-3500-015-as" data-names="as-masters 5500s+ assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">5500S+</span><span class="badge" style="background:#0D4A55">MASTERS</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-3500-015-AS</td>
+          <td class="name">AS-MASTERS 5500S+ ASSY</td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>키패드문제(3) · 핸들문제(2) · 터치문제(2) · 간헐적소리음발생(2) · 외부에서문안열림(2) · 조기방전(1) · 윈도우문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="550s-sa" data-codes="s0m-e-0550sa-005-as" data-names="as-pba main" data-bus="메인PCB(내측기판)">
+      <div class="card-h"><span class="mname">550S-SA</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0M-E-0550SA-005-AS</td>
+          <td class="name">AS-PBA MAIN</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>먹통(전원 무반응) · 간헐적 소리음/멜로디 · 조기방전 · 터치/지문 인식 이상 · 키패드 입력 이상</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="7200s" data-codes="s0m-e-7200-004-as" data-names="as-7200s pba main" data-bus="메인PCB(내측기판)">
+      <div class="card-h"><span class="mname">7200S</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0M-E-7200-004-AS</td>
+          <td class="name">AS-7200S PBA MAIN</td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>터치문제(1) · 먹통(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="7200s-f" data-codes="400-s-7200-025-as" data-names="as-7200s-f chrome assy(v4)" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">7200S-F</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-7200-025-AS</td>
+          <td class="name">AS-7200S-F CHROME ASSY(V4)<div class="spec">CHROME</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>외부에서문안열림(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="7300s" data-codes="400-s-7200-023-as" data-names="as-7300s chrome assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">7300S</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-7200-023-AS</td>
+          <td class="name">AS-7300S CHROME ASSY<div class="spec">CHROME</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="7500fs" data-codes="400-s-9050-011-as" data-names="as-7500fs chrome assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">7500FS</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-9050-011-AS</td>
+          <td class="name">AS-7500FS Chrome ASSY<div class="spec">Chrome</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>간헐적소리음발생(1) · 윈도우문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="7500s-f" data-codes="300-s-m15-035-as" data-names="as-7500s-f 내측 assy" data-bus="내측 ASSY(메인바디)">
+      <div class="card-h"><span class="mname">7500S-F</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-M15-035-AS</td>
+          <td class="name">AS-7500S-F 내측 ASSY</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>내측 핸들 처짐/파손 · 내측 케이스(사출) 파손 · 카드 인식불량 · 내부 개폐 불량</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="8500/fs" data-codes="300-s-p8500-014-as" data-names="as-8500/fs 내화형 단방향 assy inbody" data-bus="내측 ASSY(메인바디)">
+      <div class="card-h"><span class="mname">8500/FS</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-P8500-014-AS</td>
+          <td class="name">AS-8500/FS 내화형 단방향 ASSY INBODY<div class="spec">단방향 내화형</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>잠금문제(2) · 데드볼트문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="8500/s" data-codes="300-s-p8500-006-as" data-names="as-8500/s 내화형 단방향 assy inbody" data-bus="내측 ASSY(메인바디)">
+      <div class="card-h"><span class="mname">8500/S</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-P8500-006-AS</td>
+          <td class="name">AS-8500/S 내화형 단방향 ASSY INBODY<div class="spec">단방향 내화형</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>잠금문제(2) · 데드볼트문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="8600fs-black" data-codes="300-s-p8600-004-as" data-names="as-assy inbody" data-bus="내측 ASSY(메인바디)">
+      <div class="card-h"><span class="mname">8600FS-BLACK</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-P8600-004-AS</td>
+          <td class="name">AS-ASSY INBODY</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>내측 핸들 처짐/파손 · 내측 케이스(사출) 파손 · 카드 인식불량 · 내부 개폐 불량</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="8600s" data-codes="400-s-p8600-005-as" data-names="as-masters 8600s chrome 단방향 assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">8600S</span><span class="badge" style="background:#0D4A55">MASTERS</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8600-005-AS</td>
+          <td class="name">AS-MASTERS 8600S Chrome 단방향 ASSY<div class="spec">Chrome / 단방향</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>터치문제(10) · 조기방전(6) · 먹통(2) · 키패드문제(2) · 데드볼트문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="9050fs" data-codes="bsm-e-9050-004-as" data-names="as-9050fs pba main" data-bus="메인PCB(내측기판)">
+      <div class="card-h"><span class="mname">9050FS</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">BSM-E-9050-004-AS</td>
+          <td class="name">AS-9050FS PBA MAIN</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>먹통(전원 무반응) · 간헐적 소리음/멜로디 · 조기방전 · 터치/지문 인식 이상 · 키패드 입력 이상</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="9050s" data-codes="s0m-e-9050-004-as" data-names="as-9050s pba main" data-bus="메인PCB(내측기판)">
+      <div class="card-h"><span class="mname">9050S</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0M-E-9050-004-AS</td>
+          <td class="name">AS-9050S PBA MAIN</td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>외부에서문안열림(2) · 잠금문제(1) · 조기방전(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="9050s-f" data-codes="400-s-9050-014-as" data-names="as-9050s-f zeus chrome assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">9050S-F</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-9050-014-AS</td>
+          <td class="name">AS-9050S-F ZEUS Chrome ASSY<div class="spec">Chrome</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>키패드문제(2) · 제품파손/연소(1) · 간헐적소리음발생(1) · 터치문제(1) · 외부에서문안열림(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="kdl-8000s" data-codes="400-s-p8000-044-as" data-names="as-kdl-8000s d.gray assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">KDL-8000S</span><span class="badge" style="background:#34495E">KOCOM</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-044-AS</td>
+          <td class="name">AS-KDL-8000S D.Gray ASSY<div class="spec">D.Gray</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="kdl-8500/fs" data-codes="400-s-p8500-030-as" data-names="as-kdl-8500/fs 내화형 assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">KDL-8500/FS</span><span class="badge" style="background:#34495E">KOCOM</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8500-030-AS</td>
+          <td class="name">AS-KDL-8500/FS 내화형 ASSY<div class="spec">내화형</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>지문문제(2) · 먹통(1) · 외부에서문안열림(1) · 제품파손/연소(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="kdl-8500/s" data-codes="400-s-p8500-028-as" data-names="as-kdl-8500/s 내화형 assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">KDL-8500/S</span><span class="badge" style="background:#34495E">KOCOM</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8500-028-AS</td>
+          <td class="name">AS-KDL-8500/S 내화형 ASSY<div class="spec">내화형</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>조기방전(1) · 터치문제(1) · 키패드문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="kdl-p8000fs" data-codes="400-s-p8000-048-as" data-names="as-kdl-p8000fs d.gray assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">KDL-P8000FS</span><span class="badge" style="background:#34495E">KOCOM</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-048-AS</td>
+          <td class="name">AS-KDL-P8000FS D.GRAY ASSY<div class="spec">D.GRAY</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>외부에서문안열림(3) · 터치문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="kdl-p8000ws" data-codes="400-s-p8000-064-as" data-names="as-kdl-p8000ws d.gray assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">KDL-P8000WS</span><span class="badge" style="background:#34495E">KOCOM</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-064-AS</td>
+          <td class="name">AS-KDL-P8000WS D.Gray ASSY<div class="spec">D.Gray</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>외부에서문안열림(1) · 키패드문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="kdl-p8100fs" data-codes="400-s-p8100-006-as" data-names="as-kdl-p8100fs d. gray assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">KDL-P8100FS</span><span class="badge" style="background:#34495E">KOCOM</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8100-006-AS</td>
+          <td class="name">AS-KDL-P8100FS D. Gray ASSY<div class="spec">D. Gray</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>먹통(4) · 외부에서문안열림(4) · 터치문제(2) · 조기방전(1) · 더블클릭/투터치(1) · 내부에서문안열림(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="m23" data-codes="300-s-m23-002-as" data-names="as-assy inbody" data-bus="내측 ASSY(메인바디)">
+      <div class="card-h"><span class="mname">M23</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-M23-002-AS</td>
+          <td class="name">AS-ASSY INBODY</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>내측 핸들 처짐/파손 · 내측 케이스(사출) 파손 · 카드 인식불량 · 내부 개폐 불량</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="m24 / 3150s+" data-codes="300-s-3200-005-as" data-names="as-m24,3150s+assy inbody" data-bus="내측 ASSY(메인바디)">
+      <div class="card-h"><span class="mname">M24 / 3150S+</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-3200-005-AS</td>
+          <td class="name">AS-M24,3150S+ASSY INBODY</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>내측 핸들 처짐/파손 · 내측 케이스(사출) 파손 · 카드 인식불량 · 내부 개폐 불량</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="m24 / navien sdl310" data-codes="300-s-3200-010-as" data-names="as-m24, navien sdl310,410 assy inbody" data-bus="내측 ASSY(메인바디)">
+      <div class="card-h"><span class="mname">M24 / NAVIEN SDL310</span><span class="badge" style="background:#7D6608">경동나비엔</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-3200-010-AS</td>
+          <td class="name">AS-M24, NAVIEN SDL310,410 ASSY INBODY</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>내측 핸들 처짐/파손 · 내측 케이스(사출) 파손 · 카드 인식불량 · 내부 개폐 불량</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="masters 8500fs" data-codes="400-s-p8500-042-as" data-names="as-assy outbody" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">MASTERS 8500FS</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8500-042-AS</td>
+          <td class="name">AS-ASSY OUTBODY<div class="spec">B2B</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="navien sdl620-2r" data-codes="300-s-sdl620-001-as" data-names="as-assy inbody" data-bus="내측 ASSY(메인바디)">
+      <div class="card-h"><span class="mname">NAVIEN SDL620-2R</span><span class="badge" style="background:#7D6608">경동나비엔</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-SDL620-001-AS</td>
+          <td class="name">AS-ASSY INBODY</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>내측 핸들 처짐/파손 · 내측 케이스(사출) 파손 · 카드 인식불량 · 내부 개폐 불량</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="navien sdl621-3f" data-codes="300-s-sdl621-001-as" data-names="as-assy inbody" data-bus="내측 ASSY(메인바디)">
+      <div class="card-h"><span class="mname">NAVIEN SDL621-3F</span><span class="badge" style="background:#7D6608">경동나비엔</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="내측 ASSY(메인바디)">
+          <td class="bu"><span class="bu-chip" style="background:#1E8449">내측 ASSY(메인바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">300-S-SDL621-001-AS</td>
+          <td class="name">AS-ASSY INBODY</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>내측 핸들 처짐/파손 · 내측 케이스(사출) 파손 · 카드 인식불량 · 내부 개폐 불량</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="nt-21" data-codes="400-s-3200-003-as" data-names="as-nt-21 black assy outbody" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">NT-21</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-3200-003-AS</td>
+          <td class="name">AS-NT-21 BLACK ASSY OUTBODY<div class="spec">BLACK / B2B</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="p8000fws" data-codes="b2m-e-p8000-004-as" data-names="as-p8000fws pba main" data-bus="메인PCB(내측기판)">
+      <div class="card-h"><span class="mname">P8000FWS</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">B2M-E-P8000-004-AS</td>
+          <td class="name">AS-P8000FWS PBA MAIN</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>먹통(전원 무반응) · 간헐적 소리음/멜로디 · 조기방전 · 터치/지문 인식 이상 · 키패드 입력 이상</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="p8000s" data-codes="s0m-e-p8000-004-as" data-names="as-p8000s pba main" data-bus="메인PCB(내측기판)">
+      <div class="card-h"><span class="mname">P8000S</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0M-E-P8000-004-AS</td>
+          <td class="name">AS-P8000S PBA MAIN</td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>외부에서문안열림(4) · 먹통(2) · 조기방전(1) · 터치문제(1) · 간헐적소리음발생(1) · 데드볼트문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="p8000ws" data-codes="swm-e-p8000-001-as" data-names="as-p8000ws pba main" data-bus="메인PCB(내측기판)">
+      <div class="card-h"><span class="mname">P8000WS</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">SWM-E-P8000-001-AS</td>
+          <td class="name">AS-P8000WS PBA MAIN</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>먹통(전원 무반응) · 간헐적 소리음/멜로디 · 조기방전 · 터치/지문 인식 이상 · 키패드 입력 이상</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="p8100s" data-codes="s0m-e-p8100-004-as" data-names="as-p8100s pba main(st)" data-bus="메인PCB(내측기판)">
+      <div class="card-h"><span class="mname">P8100S</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="메인PCB(내측기판)">
+          <td class="bu"><span class="bu-chip" style="background:#8E44AD">메인PCB(내측기판)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">S0M-E-P8100-004-AS</td>
+          <td class="name">AS-P8100S PBA MAIN(ST)</td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>외부에서문안열림(10) · 먹통(6) · 터치문제(5) · 잠금문제(4) · 자동잠금문제(2) · 카드문제(2) · 키패드문제(2)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="p8200s" data-codes="400-s-p8200-001-as" data-names="as-assy outbody p8200s" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">P8200S</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8200-001-AS</td>
+          <td class="name">AS-ASSY OUTBODY P8200S</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="sdl310-2r" data-codes="400-s-sdl310-001-as" data-names="as-sdl310-2r, c.gold out body assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">SDL310-2R</span><span class="badge" style="background:#7D6608">경동나비엔</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-SDL310-001-AS</td>
+          <td class="name">AS-SDL310-2R, C.Gold OUT BODY ASSY<div class="spec">C.Gold</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="sdl311-2r" data-codes="400-s-sdl311-001-as" data-names="as-sdl311-2r,c.gold out body" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">SDL311-2R</span><span class="badge" style="background:#7D6608">경동나비엔</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-SDL311-001-AS</td>
+          <td class="name">AS-SDL311-2R,C.Gold OUT BODY<div class="spec">C.Gold</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="sdl410" data-codes="400-s-sdl410-001-as" data-names="as-sdl410 black assy outbody" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">SDL410</span><span class="badge" style="background:#7D6608">경동나비엔</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-SDL410-001-AS</td>
+          <td class="name">AS-SDL410 BLACK ASSY OUTBODY<div class="spec">BLACK</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="sdl411" data-codes="400-s-sdl411-001-as" data-names="as-sdl411 black assy outbody" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">SDL411</span><span class="badge" style="background:#7D6608">경동나비엔</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-SDL411-001-AS</td>
+          <td class="name">AS-SDL411 BLACK ASSY OUTBODY<div class="spec">BLACK</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="sdl520-2r" data-codes="400-s-sdl520-001-as" data-names="as-sdl520-2r, c.gold out body assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">SDL520-2R</span><span class="badge" style="background:#7D6608">경동나비엔</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-SDL520-001-AS</td>
+          <td class="name">AS-SDL520-2R, C.GOLD OUT BODY ASSY<div class="spec">C.GOLD</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="sdl521-3f" data-codes="400-s-sdl521-001-as" data-names="as-sdl521-3f, c.gold out body assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">SDL521-3F</span><span class="badge" style="background:#7D6608">경동나비엔</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-SDL521-001-AS</td>
+          <td class="name">AS-SDL521-3F, C.GOLD OUT BODY ASSY<div class="spec">C.GOLD</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="sdl620" data-codes="400-s-sdl620-001-as" data-names="as-sdl620 black assy outbody" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">SDL620</span><span class="badge" style="background:#7D6608">경동나비엔</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-SDL620-001-AS</td>
+          <td class="name">AS-SDL620 BLACK ASSY OUTBODY<div class="spec">BLACK</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="sdl621" data-codes="400-s-sdl621-001-as" data-names="as-sdl621 black assy outbody" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">SDL621</span><span class="badge" style="background:#7D6608">경동나비엔</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-SDL621-001-AS</td>
+          <td class="name">AS-SDL621 BLACK ASSY OUTBODY<div class="spec">BLACK</div></td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외측 터치 불량 · 지문 인식불량 · 키패드 일부 미입력 · 외부에서 문 안열림 · 전면 파손/스크래치</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="tm-3700+" data-codes="400-s-3500-014-as" data-names="as-tm-3700+ chrome assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">TM-3700+</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-3500-014-AS</td>
+          <td class="name">AS-TM-3700+ CHROME ASSY<div class="spec">CHROME</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>키패드문제(1) · 터치문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="tp-8000" data-codes="400-s-p8000-065-as" data-names="as-tp-8000 black 단방향 assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">TP-8000</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-065-AS</td>
+          <td class="name">AS-TP-8000 BLACK 단방향 ASSY<div class="spec">BLACK / 단방향</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>터치문제(2) · 간헐적소리음발생(1) · 블링크현상(1) · 외부에서문안열림(1) · 키패드문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="tp-8000f" data-codes="400-s-p8000-066-as" data-names="as-tp-8000f black 단방향 assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">TP-8000F</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8000-066-AS</td>
+          <td class="name">AS-TP-8000F BLACK 단방향 ASSY<div class="spec">BLACK / 단방향</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>간헐적소리음발생(2) · 지문문제(2) · 먹통(1) · 키패드문제(1) · 외부에서문안열림(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="tp-8500" data-codes="400-s-p8500-014-as" data-names="as-tp-8500 black 단방향 assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">TP-8500</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8500-014-AS</td>
+          <td class="name">AS-TP-8500 BLACK 단방향 ASSY<div class="spec">BLACK / 단방향</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>조기방전(2) · 터치문제(1) · 설치문제(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="tp-8500f" data-codes="400-s-p8500-015-as" data-names="as-tp-8500f black 단방향 assy" data-bus="외측 ASSY(프론트바디)">
+      <div class="card-h"><span class="mname">TP-8500F</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="외측 ASSY(프론트바디)">
+          <td class="bu"><span class="bu-chip" style="background:#2E86C1">외측 ASSY(프론트바디)</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">400-S-P8500-015-AS</td>
+          <td class="name">AS-TP-8500F BLACK 단방향 ASSY<div class="spec">BLACK / 단방향</div></td>
+          <td class="reason"><span class="dot real" title="AS이력 기반 실데이터"></span>지문문제(7) · 외부에서문안열림(4) · 조기방전(2) · 설치문제(1) · 간헐적소리음발생(1)</td>
+        </tr></tbody></table>
+    </div><div class="card" data-model="un3000/6400/6700 공용" data-codes="080-p-0002-01-as" data-names="as-모티스assy(un3000,6400,6700공용)" data-bus="모티스">
+      <div class="card-h"><span class="mname">UN3000/6400/6700 공용</span><span class="badge" style="background:#566573">공용</span><span class="cnt">1개 자재</span></div>
+      <table class="pt"><thead><tr><th style="width:18%">부위</th><th style="width:22%">품목코드</th><th style="width:28%">품목명</th><th style="width:32%">교체 사유 (고장 증상)</th></tr></thead>
+      <tbody><tr data-bu="모티스">
+          <td class="bu"><span class="bu-chip" style="background:#C0392B">모티스</span></td>
+          <td class="code" onclick="copyCode(this)" title="클릭 시 복사">080-P-0002-01-AS</td>
+          <td class="name">AS-모티스Assy(UN3000,6400,6700공용)</td>
+          <td class="reason"><span class="dot gen" title="부위별 표준 교체패턴"></span>외부에서 문 안열림 · 내부에서 문 안열림 · 데드볼트 동작이상 · 자동잠금 안됨 · 잠금 안됨 · 모티스 소음/걸림</td>
+        </tr></tbody></table>
+    </div>
+<div class="empty" id="empty" style="display:none">검색 결과가 없습니다.</div>
+</div>
+<div class="toast" id="toast">복사됨</div>
+<script>
+let buFilter='ALL';
+function toggleBu(el){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on'); buFilter=el.dataset.bu; filter();
+}
+function filter(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  let shown=0;
+  document.querySelectorAll('.card').forEach(card=>{
+    const txt=(card.dataset.model+' '+card.dataset.codes+' '+card.dataset.names);
+    const okQ=!q||txt.includes(q);
+    const okB=buFilter==='ALL'||card.dataset.bus.includes(buFilter);
+    let vis=okQ&&okB;
+    if(vis&&buFilter!=='ALL'){
+      card.querySelectorAll('tbody tr').forEach(tr=>{
+        tr.style.display=(tr.dataset.bu===buFilter)?'':'none';
+      });
+    } else { card.querySelectorAll('tbody tr').forEach(tr=>tr.style.display=''); }
+    card.style.display=vis?'':'none'; if(vis)shown++;
+  });
+  document.getElementById('empty').style.display=shown?'none':'block';
+}
+function copyCode(el){
+  navigator.clipboard.writeText(el.textContent.trim()).then(()=>{
+    const t=document.getElementById('toast'); t.textContent='복사됨: '+el.textContent.trim();
+    t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1100);
+  });
+}
+</script>
+</body></html>
