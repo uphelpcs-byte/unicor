@@ -9,7 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ModelManualsRouteImport } from './routes/model-manuals'
 import { Route as AsPartsRouteImport } from './routes/as-parts'
+import { Route as APPRouteImport } from './routes/APP'
 import { Route as ModelRouteImport } from './routes/$model'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CsS8RouteImport } from './routes/cs.s8'
@@ -21,9 +23,19 @@ import { Route as CsS3RouteImport } from './routes/cs.s3'
 import { Route as CsS2RouteImport } from './routes/cs.s2'
 import { Route as CsS1RouteImport } from './routes/cs.s1'
 
+const ModelManualsRoute = ModelManualsRouteImport.update({
+  id: '/model-manuals',
+  path: '/model-manuals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AsPartsRoute = AsPartsRouteImport.update({
   id: '/as-parts',
   path: '/as-parts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const APPRoute = APPRouteImport.update({
+  id: '/APP',
+  path: '/APP',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModelRoute = ModelRouteImport.update({
@@ -80,7 +92,9 @@ const CsS1Route = CsS1RouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$model': typeof ModelRoute
+  '/APP': typeof APPRoute
   '/as-parts': typeof AsPartsRoute
+  '/model-manuals': typeof ModelManualsRoute
   '/cs/s1': typeof CsS1Route
   '/cs/s2': typeof CsS2Route
   '/cs/s3': typeof CsS3Route
@@ -93,7 +107,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$model': typeof ModelRoute
+  '/APP': typeof APPRoute
   '/as-parts': typeof AsPartsRoute
+  '/model-manuals': typeof ModelManualsRoute
   '/cs/s1': typeof CsS1Route
   '/cs/s2': typeof CsS2Route
   '/cs/s3': typeof CsS3Route
@@ -107,7 +123,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$model': typeof ModelRoute
+  '/APP': typeof APPRoute
   '/as-parts': typeof AsPartsRoute
+  '/model-manuals': typeof ModelManualsRoute
   '/cs/s1': typeof CsS1Route
   '/cs/s2': typeof CsS2Route
   '/cs/s3': typeof CsS3Route
@@ -122,7 +140,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$model'
+    | '/APP'
     | '/as-parts'
+    | '/model-manuals'
     | '/cs/s1'
     | '/cs/s2'
     | '/cs/s3'
@@ -135,7 +155,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$model'
+    | '/APP'
     | '/as-parts'
+    | '/model-manuals'
     | '/cs/s1'
     | '/cs/s2'
     | '/cs/s3'
@@ -148,7 +170,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$model'
+    | '/APP'
     | '/as-parts'
+    | '/model-manuals'
     | '/cs/s1'
     | '/cs/s2'
     | '/cs/s3'
@@ -162,7 +186,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ModelRoute: typeof ModelRoute
+  APPRoute: typeof APPRoute
   AsPartsRoute: typeof AsPartsRoute
+  ModelManualsRoute: typeof ModelManualsRoute
   CsS1Route: typeof CsS1Route
   CsS2Route: typeof CsS2Route
   CsS3Route: typeof CsS3Route
@@ -175,11 +201,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/model-manuals': {
+      id: '/model-manuals'
+      path: '/model-manuals'
+      fullPath: '/model-manuals'
+      preLoaderRoute: typeof ModelManualsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/as-parts': {
       id: '/as-parts'
       path: '/as-parts'
       fullPath: '/as-parts'
       preLoaderRoute: typeof AsPartsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/APP': {
+      id: '/APP'
+      path: '/APP'
+      fullPath: '/APP'
+      preLoaderRoute: typeof APPRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$model': {
@@ -258,7 +298,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ModelRoute: ModelRoute,
+  APPRoute: APPRoute,
   AsPartsRoute: AsPartsRoute,
+  ModelManualsRoute: ModelManualsRoute,
   CsS1Route: CsS1Route,
   CsS2Route: CsS2Route,
   CsS3Route: CsS3Route,
