@@ -184,6 +184,13 @@ export function Sidebar() {
             🛠 모델별 AS자재 및 교체사유
           </Link>
 
+          <Link
+            to="/APP"
+            className={`sb-link sb-home-link ${pathname === "/APP" ? "active" : ""}`}
+          >
+            📱 APP 연동방법
+          </Link>
+
           <CsManualMenu pathname={pathname} />
 
           {lines.map((line) => {
