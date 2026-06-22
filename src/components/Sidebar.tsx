@@ -185,6 +185,13 @@ export function Sidebar() {
           </Link>
 
           <Link
+            to="/model-manuals"
+            className={`sb-link sb-home-link ${pathname === "/model-manuals" ? "active" : ""}`}
+          >
+            📘 모델별 매뉴얼 모음
+          </Link>
+
+          <Link
             to="/APP"
             className={`sb-link sb-home-link ${pathname === "/APP" ? "active" : ""}`}
           >

@@ -1,0 +1,797 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>유니코 도어락 CS 처리 매뉴얼</title><style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,sans-serif;background:#eef2f3;color:#1a2526;line-height:1.55}
+.top{background:linear-gradient(135deg,#0D4A55,#2E8B9A);color:#fff;padding:26px 22px 18px}
+.top h1{margin:0 0 4px;font-size:22px}.top p{margin:0;opacity:.85;font-size:13px}
+.stat{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap}
+.stat div{background:rgba(255,255,255,.13);padding:7px 13px;border-radius:8px;font-size:12.5px}.stat b{font-size:17px;display:block}
+nav{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #d6dee0;padding:9px 16px;display:flex;gap:6px;flex-wrap:wrap;box-shadow:0 2px 5px rgba(0,0,0,.04)}
+nav a{font-size:12.5px;color:#33484b;text-decoration:none;padding:5px 11px;border-radius:16px;background:#f1f5f6;white-space:nowrap}
+nav a:hover{background:#0D4A55;color:#fff}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 22px 70px}
+section{margin-bottom:34px;scroll-margin-top:60px}
+h2.sh{font-size:19px;color:#0D4A55;border-left:5px solid #2E8B9A;padding-left:11px;margin:0 0 14px}
+h3.sub{font-size:15px;color:#2E8B9A;margin:18px 0 8px}
+table.t{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+table.t th{background:#0D4A55;color:#fff;text-align:left;padding:8px 12px;font-size:12px}
+table.t td{padding:8px 12px;border-bottom:1px solid #eef2f3}
+table.t tr:last-child td{border-bottom:none}
+table.t td.m,table.t td:first-child.m{font-weight:700;color:#0D4A55;font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box{background:#fff;border-radius:9px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.box.free{border-top:4px solid #2E8B9A}.box.paid{border-top:4px solid #C8A96E}
+.box h4{margin:0 0 8px;font-size:14px}.box ul{margin:0;padding-left:18px;font-size:12.5px}
+.wf{display:flex;gap:10px;background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:7px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.wf-k{font-weight:700;color:#2E8B9A;white-space:nowrap;font-size:13px}.wf-v{font-size:13px}
+.guide{background:#fff;border-radius:9px;padding:12px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.guide h4{margin:0 0 6px;color:#0D4A55;font-size:14px}.guide ol{margin:0;padding-left:20px;font-size:13px}.guide li{margin:2px 0}
+.search{width:100%;max-width:440px;padding:10px 14px;border:1.5px solid #cdd8da;border-radius:9px;font-size:14px;outline:none;margin-bottom:14px}
+.search:focus{border-color:#2E8B9A}
+.ccard{background:#fff;border-radius:9px;margin-bottom:9px;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow:hidden}
+.ccard-h{display:flex;align-items:center;gap:9px;padding:12px 15px;cursor:pointer}
+.cnum{font-size:11px;font-weight:700;color:#fff;background:#2E8B9A;padding:2px 7px;border-radius:5px}
+.cname{font-weight:700;color:#0D4A55;font-size:15px}.cmeta{margin-left:auto;font-size:12px;color:#7a8a8c}
+.caret{transition:.2s;color:#7a8a8c}.ccard.open .caret{transform:rotate(180deg)}
+.ccard-b{display:none;padding:0 15px 15px;font-size:13px}.ccard.open .ccard-b{display:block}
+.meta-line{font-size:11.5px;color:#777;background:#f4f8f9;border-left:3px solid #2E8B9A;padding:5px 9px;margin-bottom:9px;border-radius:0 4px 4px 0}
+.def,.sec,.row2,.note,.sample{margin:7px 0}
+.def b,.sec b,.cost b,.note b{color:#0D4A55;display:inline}
+.sec ul{margin:4px 0 0;padding-left:18px}.sec li{margin:2px 0}
+.flow{font-style:italic;color:#33484b;background:#f7fafb;padding:5px 9px;border-radius:5px;margin:3px 0;font-size:12.5px}
+.note{background:#fbf8f1;padding:7px 10px;border-radius:6px}
+.sample{background:#eef6f7;padding:7px 10px;border-radius:6px;font-size:12px;color:#33484b}.sample b{color:#2E8B9A}
+.sccard{background:#fff;border-radius:9px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sccard h4{margin:0 0 3px;color:#0D4A55;font-size:15px}
+.sc-sub{font-size:12px;color:#8a6d2b;background:#fbf8f1;border-left:3px solid #C8A96E;padding:4px 9px;border-radius:0 4px 4px 0;margin-bottom:10px;display:inline-block}
+.dl{display:flex;gap:8px;margin:5px 0;font-size:13px}
+.dl .rl{font-weight:700;min-width:42px}.dl.c .rl{color:#8a6d2b}.dl.s .rl{color:#2E8B9A}
+.dl.c .tx{color:#444}.dl.s .tx{color:#1a2526}
+.tm{display:inline-block;background:#fff;border:1px solid #dde5e7;border-radius:6px;padding:4px 9px;margin:3px;font-size:12px}
+.tm b{color:#2E8B9A}
+.empty{text-align:center;color:#8a9a9c;padding:30px}
+@media(max-width:640px){.two{grid-template-columns:1fr}}
+</style></head><body>
+<div class="top"><h1>🔐 유니코 도어락 CS 처리 매뉴얼</h1>
+<p>증상별 응대 · 자가조치 · 처리 워크플로우 · 유무상/비용 · 상황별 응대 스크립트</p>
+<div class="stat"><div><b>7,467</b>상담 분석</div><div><b>56</b>증상 유형</div><div><b>24</b>단종/교체 모델</div><div><b>15</b>응대 스크립트</div></div></div>
+<nav>
+<a href="#s1">1. 개요·통계</a><a href="#s2">2. 워크플로우</a><a href="#s3">3. 유무상·비용</a>
+<a href="#s4">4. 자가조치</a><a href="#s5">5. 증상별 매뉴얼</a><a href="#s6">6. 모델 특이사항</a>
+<a href="#s7">7. 타사·이관</a><a href="#s8">8. 응대 스크립트</a></nav>
+<div class="wrap">
+
+<section id="s1"><h2 class="sh">1. 데이터 개요 및 접수 통계</h2>
+<p style="font-size:13px">상담 티켓 7,467건(2026년 3월~) 전수 분석 기반. 실제 응대·처리 이력에서 증상 유형, 자가조치, 처리 단계, 유무상/비용을 표준화.</p>
+<div class="two"><div><h3 class="sub">접수 채널</h3><table class="t"><tr><th>채널</th><th>건수</th></tr><tr><td>페이지</td><td>6527</td></tr><tr><td>기타</td><td>462</td></tr><tr><td>전화</td><td>422</td></tr><tr><td>채팅</td><td>56</td></tr></table></div>
+<div><h3 class="sub">처리 상태</h3><table class="t"><tr><th>상태</th><th>건수</th></tr><tr><td>완료(해결)</td><td>7343</td></tr><tr><td>닫힘(보류)</td><td>105</td></tr><tr><td>처리중(진행중)</td><td>18</td></tr><tr><td>열림</td><td>1</td></tr></table></div></div>
+<h3 class="sub">증상·문의 유형 (상위 20)</h3><table class="t"><tr><th>순위</th><th>유형</th><th>건수</th></tr><tr><td>1</td><td>9볼트 문안열림(외부)</td><td>973</td></tr><tr><td>2</td><td>제품기능문의</td><td>740</td></tr><tr><td>3</td><td>제품, 소모품 구매문의</td><td>463</td></tr><tr><td>4</td><td>자동잠금안됨</td><td>442</td></tr><tr><td>5</td><td>잠금안됨</td><td>399</td></tr><tr><td>6</td><td>비밀번호분실</td><td>391</td></tr><tr><td>7</td><td>수리요청(AS)</td><td>327</td></tr><tr><td>8</td><td>외부터치불량</td><td>313</td></tr><tr><td>9</td><td>먹통</td><td>266</td></tr><tr><td>10</td><td>외부에서 문 안열림</td><td>265</td></tr><tr><td>11</td><td>간헐적 소리음 발생</td><td>263</td></tr><tr><td>12</td><td>일부숫자 안눌림</td><td>226</td></tr><tr><td>13</td><td>수리거부</td><td>211</td></tr><tr><td>14</td><td>지문인식 안됨</td><td>207</td></tr><tr><td>15</td><td>제품 사용법미숙</td><td>188</td></tr><tr><td>16</td><td>건전지 방전</td><td>150</td></tr><tr><td>17</td><td>핸들불량(내측케이스파손)</td><td>139</td></tr><tr><td>18</td><td>연동 불량, 누락</td><td>122</td></tr><tr><td>19</td><td>건전지 커버불량</td><td>121</td></tr><tr><td>20</td><td>데드볼트 걸림</td><td>115</td></tr></table></section>
+
+<section id="s2"><h2 class="sh">2. CS 표준 처리 워크플로우</h2><div class="wf"><span class="wf-k">① 접수</span><span class="wf-v">웹페이지/전화/채팅으로 증상·모델명·주소·연락처 접수. 모델 불명 시 영문 모델명/KC 스티커 사진 문자 요청.</span></div><div class="wf"><span class="wf-k">② 1차 분류·판정</span><span class="wf-v">증상 분류 → 모델 확인 → 무상·유상 1차 판정. 타사·관할 외 모델은 이관.</span></div><div class="wf"><span class="wf-k">③ 자가조치 안내</span><span class="wf-v">9V 비상개문·리셋·건전지 교체·자동잠금 재설정 등 1차 자가조치. 해결 시 상담처리 완료.</span></div><div class="wf"><span class="wf-k">④ 지점·기사 배정 (OB)</span><span class="wf-v">담당자가 지역 기사 배정 → 기사 방문 전 사전연락(영업일 30분~1시간, 야간/원거리는 익일).</span></div><div class="wf"><span class="wf-k">⑤ 방문·현장 조치</span><span class="wf-v">현장 점검 → 무상 수리 또는 유상 수리/파손 교체. 현장 카드/계좌이체 결제.</span></div><div class="wf"><span class="wf-k">⑥ 처리결과 회신</span><span class="wf-v">처리내용·결과를 티켓에 기록하고 고객 회신.</span></div><div class="wf"><span class="wf-k">⑦ 완료처리</span><span class="wf-v">정상 종결=완료(해결), 재연락·이관=닫힘(보류).</span></div>
+<p style="font-size:13px;font-weight:700;color:#0D4A55;margin-top:10px">예시: 접수 → 지점 OB(배차) → 기사 방문·처리 → 처리결과 회신 → 완료처리</p></section>
+
+<section id="s3"><h2 class="sh">3. 유·무상 판정 기준 및 표준 비용</h2>
+<div class="two"><div class="box free"><h4>무상 AS 대상</h4><ul><li>무상보증기간 내 <b>도어락 기기 자체 결함</b></li><li>모티스·키패드·PCB 등 부품 고장</li><li>설치 초기 제품 불량 / 구성품 누락</li></ul></div>
+<div class="box paid"><h4>유상 처리 대상</h4><ul><li>보증기간 경과 / 결로·습기 고장</li><li>건전지 문제·사용자 과실·외부 충격</li><li>문·문틀 유격 등 설치환경 / 비번·카드 분실(파손교체)</li></ul></div></div>
+<p style="font-size:12.5px;margin-top:10px"><b>원칙:</b> 도어락(기기) 문제는 무상, 문·문틀·환경·건전지·과실은 유상. 결로·습기·과실 판명 시 출장비 발생 사전 고지.</p>
+<h3 class="sub">표준 비용 매트릭스</h3><table class="t"><tr><th>항목</th><th>표준 안내 금액</th></tr><tr><td>출장비(개문/취소)</td><td>3만원 ~ (유형별 4·5·7만원)</td></tr><tr><td>9V 개문만(파손無)</td><td>약 4만원</td></tr><tr><td>모티스 교체</td><td>7만원 ~</td></tr><tr><td>일반 수리(키패드/소음)</td><td>10~15만원</td></tr><tr><td>내측케이스 교체(출장 포함)</td><td>약 7만원</td></tr><tr><td>건전지덮개 단품</td><td>약 13,000원</td></tr><tr><td>내측케이스 단품</td><td>약 25,000원 (2개+택배 50,000원)</td></tr><tr><td>일반 손잡이형 교체</td><td>18~25만원</td></tr><tr><td>비번/카드 분실 파손교체</td><td>21~23만원(할증 포함), 규격별 30~35만원</td></tr><tr><td>푸시풀형 교체</td><td>30만원 ~</td></tr><tr><td>노후·단종 교체</td><td>24~40만원</td></tr><tr><td>월패드 연동기</td><td>+ 약 10만원</td></tr><tr><td>신규 설치(동급)</td><td>약 35만원</td></tr></table>
+<p style="font-size:12px;color:#777;margin-top:6px">※ 모델·규격·시간대(야간·주말 할증)에 따라 변동, 현장 견적이 최종 기준.</p></section>
+
+<section id="s4"><h2 class="sh">4. 공통 자가조치 안내 (응대 스크립트)</h2>
+<p style="font-size:13px">전화·채팅 응대 시 우선 안내. 해결 시 상담처리(무상) 종결, 미해결 시 출동 접수 전환.</p><div class="guide"><h4>▸ 9V 비상개문 (외부 잠김 시)</h4><ol><li>외부 비상단자에 9V(네모난) 건전지를 접촉한 상태 유지.</li><li>접촉한 채로 비밀번호 입력 후 별표(*).</li><li>점등·개문되면 내부에서 정품 건전지 전체 교체.</li><li>반복 시 키패드/기기 점검 접수.</li></ol></div><div class="guide"><h4>▸ 리셋 (먹통·터치불량)</h4><ol><li>하단 일자형 돌출부 사이 리셋홀 확인.</li><li>핀/옷핀으로 약 5초 눌렀다 떼기.</li><li>건전지 분리 후 재장착, 동작 확인.</li><li>미해결 시 방문 점검.</li></ol></div><div class="guide"><h4>▸ 데드볼트 걸림 임시개방</h4><ol><li>비밀번호 입력 후 별표(*).</li><li>손잡이 잡고 문 앞뒤로 강하게 흔들며 개방.</li><li>반복 시 모티스/걸쇠 점검 접수.</li></ol></div><div class="guide"><h4>▸ 건전지 교체</h4><ol><li>실내측 안전잠금버튼 위 홈을 누르며 위로 밀어 커버 개방.</li><li>알카라인 정품 전체 교체(망간·충전식 금지).</li><li>교체에도 한 달 미만 방전이면 점검 접수.</li></ol></div><div class="guide"><h4>▸ 자동잠금 재설정</h4><ol><li>건전지 정품 전체 교체.</li><li>모델별 자동잠금 설정 재실행(등록버튼+외부버튼).</li><li>문틀 자석/스트라이커 위치 확인.</li><li>안전잠금버튼 무반응이면 고장 → 방문 접수.</li></ol></div><div class="guide"><h4>▸ 마스터(비밀번호) 등록</h4><ol><li>반드시 문을 연 상태에서 진행.</li><li>커버 열고 등록버튼 → 새 번호 → 등록버튼.</li><li>공장 초기 비번 1234, 입력 후 별표(*) 적용.</li></ol></div><div class="guide"><h4>▸ 지문 등록</h4><ol><li>등록버튼 누른 뒤 같은 손가락 4회 연속 인식.</li><li>완료 후 등록버튼으로 종료.</li><li>등록 중 꺼지면 건전지·인식부 확인.</li></ol></div><div class="guide"><h4>▸ 터치형 자동잠금</h4><ol><li>외부 번호판에 손바닥 3초 이상 → 잠김.</li><li>번호 입력 없이 터치만으로 동작.</li></ol></div></section>
+
+<section id="s5"><h2 class="sh">5. 증상별 처리 매뉴얼 (전 56종)</h2>
+<input class="search" id="catSearch" placeholder="🔍 증상 검색 (예: 9볼트, 자동잠금, 지문)" oninput="filterCat()">
+<p style="font-size:12px;color:#777">제목을 클릭하면 펼쳐집니다.</p>
+<div id="catList"><div class="ccard" data-name="9볼트 문안열림(외부)" id="cat0">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.1</span><span class="cname">9볼트 문안열림(외부)</span>
+        <span class="cmeta">접수 973건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 24 · 유상 190 · 무상 75 · 수리거부 14</div>
+          <div class="def"><b>증상 정의</b> 건전지 방전 또는 키패드/터치 불량으로 외부에서 문이 열리지 않는 상태. 화면이 깜빡이거나 떴다 바로 꺼짐, 번호 입력 불가, 초록 자물쇠만 표시 등 동반.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>외부 비상단자에 9V(네모난) 건전지를 접촉한 상태로 비밀번호+별표(*)를 입력해 개문 안내.</li><li>9V로도 안 되면 기기 하단 일자형 돌출부 사이의 리셋홀을 핀/옷핀으로 약 5초 눌렀다 뗀 뒤 재시도.</li><li>리셋·9V 모두 실패 시 키패드(PCB) 고장 또는 데드볼트 걸림으로 판단, 현장 방문 접수.</li><li>모델 확인 어려우면 제품 측면/상단 영문 모델명 또는 KC 스티커 사진을 문자로 요청.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수(증상·모델·주소) → 9V/리셋 자가조치 안내 → 미해결 시 지점·기사 배정(OB) → 기사 사전연락 후 방문(영업일 30분~1시간 내) → 현장 점검·개문/교체 → 처리결과 회신 → 완료처리</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 개문만 되는 경우 출장비 4만원 수준. 파손 후 교체 시 18~25만원(일반 손잡이형), 푸시풀형 30만원~. 무상보증기간 내 기기 결함은 무상이나, 결로·습기·건전지·사용자 과실은 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 9볼트 문안열림은 본 센터 최다 접수 유형(973건). 보증기간 경과 제품은 재연락 시 유상 안내 예정으로 메모. 단종 모델은 수리 불가 → 동급 최신 모델 교체.</div>
+          <div class="sample"><b>실제 처리 사례</b> [KDL-3250S] 상담사님께서는 해당 주소지를 확인한 후, 문 파손에 따른 교체 비용이 23만 원임을 안내하였습니다. 접수를 완료하였으며, 수리 기사가 30분에서 1시간 이내에 방문할 예정이니 세입자분께 해당 내용을 전달해 달라고 안내하였습니다.</div></div>
+    </div><div class="ccard" data-name="제품기능문의" id="cat1">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.2</span><span class="cname">제품기능문의</span>
+        <span class="cmeta">접수 740건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 11 · 유상 13 · 수리거부 7 · 무상 1</div>
+          <div class="def"><b>증상 정의</b> 비밀번호 변경/마스터번호 등록, 지문·카드 등록, 공장초기화, 잠금방식 변경, 앱·블루투스 연동 등 사용법·기능 관련 문의.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>마스터(비밀번호) 등록: 반드시 문을 연 상태에서 건전지커버를 열고 등록버튼 클릭 → 새 번호 입력 → 등록버튼 재클릭.</li><li>공장 출고 초기 비밀번호는 1234이며, 입력 후 별표(*)로 적용. (마스터키 비번은 센터 조회 불가, 사용자 직접 등록)</li><li>지문 등록: 등록버튼 누른 후 지문 인식부에 같은 손가락을 4회 연속 인식 → 완료 후 등록버튼으로 종료.</li><li>터치형 자동잠금: 외부 번호판에 손바닥을 3초 이상 대면 잠김.</li><li>등록버튼이 안 보이거나 번호판 불이 안 들어오면 유리문에서 떼어 확인하거나 매뉴얼 문자 발송.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수/응대 → 모델 확인 → 해당 모델 조작법 구두·문자 안내 → 해결 확인 → 완료. 미해결·기능 미탑재 건은 담당부서 확인 후 익일 회신.</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 기능 안내는 무상(상담처리). 등록버튼/키패드 불량으로 확인되면 AS 전환(유·무상 판정).</div></div>
+          <div class="note"><b>모델·특이사항</b> 앱·블루투스·안면인식은 신규 모델 전용으로, 구형(예: IDL-400M)에는 모듈 미제공. 통합 설명서의 타 모델 기능과 혼동 주의.</div>
+          <div class="sample"><b>실제 처리 사례</b> [LM-450W 목문형] 도어록이 알맞는 비번을 입력했는데도 안열리는/  증상이 3회나 발생했습니다. 이 부분 관련해서 문의하고싶습니다. 카드+비밀번호(이중잠금)방문수동모드설정. LM450W / 설치2025년 9월설치 / 3~4월건전지교체하니 정상</div></div>
+    </div><div class="ccard" data-name="제품, 소모품 구매문의" id="cat2">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.3</span><span class="cname">제품, 소모품 구매문의</span>
+        <span class="cmeta">접수 463건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 8 · 유상 157 · 무상 49</div>
+          <div class="def"><b>증상 정의</b> 건전지커버(덮개), 내측/외측 케이스, 카드키, 리모컨, 통신팩 등 부품·소모품 구매 및 신규 설치 문의.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지덮개 파손·헐거움: 덮개 단품 판매(약 13,000원). 강화 보완품으로 교체됨 안내.</li><li>내측케이스 파손: 개당 약 25,000원(택배비 포함 2개 50,000원 등), 이전 구매이력 있으면 배송비 면제 검토.</li><li>카드키 재등록: 마스터(공)카드 보유 시 재등록 가능, 전부 분실 시 초기화 필요 → 매뉴얼 문자 안내.</li><li>구매 진행 시 입금계좌·배송지·입금자명을 문자로 발송, 당일 마감 후 익일 출고 안내.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 모델·파손부위 사진 문자 확인 → 부품 가격·배송 안내 → 입금/결제 → 출고. 담당자 부재 시 결제정보 회신 처리.</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 덮개 13,000원 / 내측케이스 25,000원~ / 케이스 출장교체 약 7만원 / 신규 설치 동급 모델 35만원 수준(현장 견적).</div></div>
+          <div class="note"><b>모델·특이사항</b> 동일 단종 부품은 동급 호환품으로 안내(로고·디자인 상이 가능). 2선식/4선식 등 연동 규격 확인 필수.</div>
+          <div class="sample"><b>실제 처리 사례</b> [모델명확인안됨] 상담사님께서는 고객님의 정보를 확인한 후, 담당자가 부재중임을 안내하며 전송된 사진을 확인하여 결제 금액 및 계좌번호를 다시 안내해 드릴 수 있도록 담당자에게 전달하여 연락드리겠다고 답변하였습니다.</div></div>
+    </div><div class="ccard" data-name="자동잠금안됨" id="cat3">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.4</span><span class="cname">자동잠금안됨</span>
+        <span class="cmeta">접수 442건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 11 · 무상 51 · 유상 33 · 수리거부 1</div>
+          <div class="def"><b>증상 정의</b> 문을 닫아도 자동으로 잠기지 않음. 안전잠금버튼을 눌러도 데드볼트가 나오지 않거나 여러 번 반복 후 잠김, 화면상 열림 표시.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지를 알카라인 정품 전체로 새로 교체 후 자동잠금 재설정 안내(등록버튼+외부버튼 조작, 모델별 R-3-R 등).</li><li>문틀의 자석/스트라이커(센서) 위치 확인 — 센서 미인식 시 자동잠금 동작 안 함.</li><li>안전잠금버튼을 눌렀을 때 데드볼트가 전혀 동작·반응이 없으면 모티스/기기 고장으로 판단 → 방문 접수.</li><li>증상 확인용 사진/영상과 내부 측면 시리얼(제조일) 문자 요청.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 건전지·자동잠금 재설정 자가조치 → 미해결 시 모티스 교체 우선 접수(OB) → 기사 방문 점검 → 처리결과 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 모티스 교체 7만원~, 수리 7~9만원, 교체 18~30만원(모델별). 도어락 결함 무상, 건전지·습기·위치(설치)문제·사용자과실 유상(출장비 3만원~).</div></div>
+          <div class="note"><b>모델·특이사항</b> 안전잠금버튼 무반응 = 교체 필요 신호. PM900V 등 노후·단종 모델은 수리 불가 → 교체(30~40만원).</div>
+          <div class="sample"><b>실제 처리 사례</b> [모델확인후재접수] 상담사님께서는 고객님의 거주 지역과 아파트 명을 확인하여 설치 경로를 파악하고자 하였으며, 제품의 모델명을 확인하는 방법을 안내하였습니다. 다만, 고객님께서 제품 외관상 모델명을 찾기 어렵다고 말씀하시며 추후 다시 연락하기로 하여 상담이 종료되었습니다.</div></div>
+    </div><div class="ccard" data-name="잠금안됨" id="cat4">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.5</span><span class="cname">잠금안됨</span>
+        <span class="cmeta">접수 399건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 9 · 무상 57 · 유상 33 · 수리거부 2</div>
+          <div class="def"><b>증상 정의</b> 문이 안에서도 밖에서도 잠기지 않거나, 레버를 내리면 비번 없이 열림, 잠금표시만 뜨고 실제 미잠금.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지 전체 교체 후 잠금/자동잠금 설정 재시도.</li><li>문 열린 상태에서 동작이 정상인지 확인(문 닫았을 때만 문제면 문틀·위치 문제 가능).</li><li>관리실 문(방화문) 자체 문제와 도어락 문제를 구분 — 관리실 확인 선행 안내.</li><li>안전잠금버튼 무반응이면 고장으로 판단.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 자가조치 → 무상보증·증상 확인 → 방문 접수(OB) → 점검·수리/교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 수리 7~12만원, 교체 18~25만원, 월패드연동 포함 시 +10만원. 도어락 결함 무상, 문·문틀·습기·건전지 유상(출장비 3만원~).</div></div>
+          <div class="note"><b>모델·특이사항</b> 레버형에서 레버 내리면 무조건 열리는 건 잠금모드 설정 문제일 수 있어 사용법 먼저 확인.</div>
+          <div class="sample"><b>실제 처리 사례</b> [8600S] 8600s / KMA06P2312U0179 설치2년경과 / 안잠길때있음. 수리비용 7~ 12</div></div>
+    </div><div class="ccard" data-name="비밀번호분실" id="cat5">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.6</span><span class="cname">비밀번호분실</span>
+        <span class="cmeta">접수 391건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 9 · 유상 154 · 수리거부 2 · 무상 1</div>
+          <div class="def"><b>증상 정의</b> 비밀번호/마스터번호 분실 또는 불일치로 출입 불가. 카드키·마스터키 미보유 시 개방수단 없음.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>오입력 가능성 확인(특수기호 포함 재입력 등) — 정확 입력에도 오류음이면 분실 확정.</li><li>카드키/마스터키 보유 여부 확인 — 보유 시 재등록·초기화 가능.</li><li>카드·마스터키 전부 없으면 직접 개방 불가 → 현장에서 제품 파손 후 교체만 가능 안내.</li><li>창문 등 대체 진입 가능 여부 확인 후 긴급 출동 접수.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수/응대 → 개방수단 확인 → 파손교체 비용 동의 → 주소·성함 확인 후 긴급출동 접수(OB) → 기사 사전연락·방문(30분~1시간, 야간 1.5~2시간) → 파손교체·결제 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 파손 후 교체 21~23만원(야간·주말 할증 포함), 모델/규격에 따라 30~35만원. 결제는 현장 카드/계좌이체, 현금영수증 발행 가능.</div></div>
+          <div class="note"><b>모델·특이사항</b> 비밀번호 분실은 전량 유상(파손교체). 임대인 동의 필요한 세입자 건은 협의 후 접수.</div>
+          <div class="sample"><b>실제 처리 사례</b> [TN-5000] 상담사님께서는 비밀번호를 모르는 경우 제품 파손 후 교체가 필요함을 안내하였으며, 야간 및 주말 할증을 고려하여 교체 및 설치 비용을 23만 원으로 협의하였습니다. 이후 고객님의 주소(강북구 수유동 선빌 201호)와 성함(박애숙)을 확인하여 긴급 출동 서비스를 접수하였으며, 기사님이 30분에서 1시간 이내에 방문할 예정임을 안내하였습니다.</div></div>
+    </div><div class="ccard" data-name="수리요청(as)" id="cat6">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.7</span><span class="cname">수리요청(AS)</span>
+        <span class="cmeta">접수 327건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 11 · 무상 28 · 유상 24 · 수리거부 6</div>
+          <div class="def"><b>증상 정의</b> 고장·불량 전반의 AS 접수, 손잡이 흔들림, 내부 개폐불량, 접수 후 미연락(독촉), 기사 응대 클레임 등 포함.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>증상 구체화: 문 열린 상태 동작 여부, 외부/내부 구분, 재현 빈도 확인.</li><li>내부핸들 좌우 흔들림은 정상 범위일 수 있어 설치영상/문자 안내로 자가확인 유도.</li><li>모델·시리얼·문 사진 문자 요청 후 접수.</li><li>미연락 독촉 건은 접수상태 즉시 확인·사과 후 담당기사 빠른 연락 조치.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 증상·모델 확인 → 무상보증 확인 → 지점·기사 배정(OB) → 기사 사전연락·방문 → 점검·수리/교체 → 처리결과 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 현장 견적. 개문 4만원/파손교체 21만원 식 분기 안내. 도어락 결함 무상, 문·환경·과실 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 타사·단종 모델은 전문업체(예: 1644-5303) 안내. 기사 불친절 클레임은 해당 지점에 전달·개선 조치.</div>
+          <div class="sample"><b>실제 처리 사례</b> [중복접수(접수문의)] 상담사님께서는 정확한 점검을 위해 현재 문을 열어둔 상태에서의 동작 여부를 확인해 달라고 요청하셨습니다. 또한, AS 접수를 진행하기 위해서는 해당 제품의 모델명을 확인해야 함을 안내하였으며, 모델명 확인 후 접수 절차를 도와드리겠다고 답변하셨습니다.</div></div>
+    </div><div class="ccard" data-name="외부터치불량" id="cat7">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.8</span><span class="cname">외부터치불량</span>
+        <span class="cmeta">접수 313건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 13 · 유상 63 · 무상 62 · 수리거부 2</div>
+          <div class="def"><b>증상 정의</b> 외부 터치패드 숫자 미표시·미인식, 화면 켜졌다 꺼짐, 일부 숫자만 반응, 혼자 터치음·자동잠금 등 오작동.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지 전체 교체 후 재시도(되다 안 되다 하는 간헐 증상 다수).</li><li>9V 접촉 상태에서 비번 입력 시 동작하면 전원·접촉 문제로 분류.</li><li>리셋홀 5초 리셋 + 문 주변 가볍게 충격 후 재시도.</li><li>미해결·반복 시 외부 키패드(PCB) 불량으로 방문 접수.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 건전지·리셋 자가조치 → 미해결 시 방문 접수(OB) → 외부 PCB/기기 점검·교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 수리 10만원~, 교체 18~25만원, 연동 포함 +10만원. 도어락 결함 무상, 결로·습기·과실 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 간헐 증상은 영상 확보가 진단에 유리. 노후·단종 모델은 교체만 가능.</div>
+          <div class="sample"><b>실제 처리 사례</b> [TP-8000] tp8000/ 2025-10 제조, 설치 2026년도 1월~2월설치 , 통화중 고장증상확인안됨</div></div>
+    </div><div class="ccard" data-name="먹통" id="cat8">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.9</span><span class="cname">먹통</span>
+        <span class="cmeta">접수 266건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 5 · 유상 35 · 무상 17 · 수리거부 3</div>
+          <div class="def"><b>증상 정의</b> 전원·반응 전혀 없음, 번호판 불 안 들어옴, 터치/버튼 무반응, 오류 후 완전 정지.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지 전체 신품 교체(망간 금지, 알카라인) 후 재시도.</li><li>리셋홀 5초 리셋 후 재시도.</li><li>9V 비상전원으로 개문 시도(외부 잠김 시).</li><li>모두 실패 시 기기 고장 → 방문 접수.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 건전지·리셋·9V 자가조치 → 미해결 시 방문 접수(OB) → 점검·교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 기기교체만 가능 시 25만원 수준. 도어락 결함 무상, 그 외 유상(출장비 3만원~).</div></div>
+          <div class="note"><b>모델·특이사항</b> 설치 직후 먹통은 제품 불량 가능 → 무상 우선 점검. 단종 모델은 교체만 가능.</div>
+          <div class="sample"><b>실제 처리 사례</b> [5500S플러스] 접수0  5500S상담사님께서는 우선 자동 잠금 설정을 재설정하는 방법(등록 버튼 및 외부 버튼 조작)을 안내하였으며, 건전지 재장착 및 내부 잠금 버튼 작동 여부를 확인하도록 요청하셨습니다. 자가 조치 후에도 증상이 해결되지 않음에 따라 서비스 기사 방문을 예약해 드렸으며, 기존 설치 이력을 바탕으로 기기 결함 시 무상 처리가 가능함을 안내하였습니다. 다만, 기사 방문 시 기기 문제가 아닌 것으로 판명될 경우 비용이 발생할 수 있음을 고지하고 고객님의 희망 시간에 맞춰 최대한 빠른 방문을 약속드렸습니다.</div></div>
+    </div><div class="ccard" data-name="외부에서 문 안열림" id="cat9">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.10</span><span class="cname">외부에서 문 안열림</span>
+        <span class="cmeta">접수 265건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 6 · 유상 32 · 무상 28</div>
+          <div class="def"><b>증상 정의</b> 비번/카드/지문 정상 입력에도 외부에서 문이 열리지 않음. 풀리는 소리만 나고 미개방, 자물쇠 표시 반복.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>9V 비상전원으로 개문 시도 후 단자 부위 조작법 문자 안내.</li><li>비번+별표 후 손잡이 잡고 문을 앞뒤로 강하게 흔들기(데드볼트 걸림 임시조치).</li><li>건전지 교체·리셋 후 재시도.</li><li>미해결 시 현장 방문(개문 또는 파손교체).</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 9V/흔들기 자가조치 → 미해결 시 출동 접수(OB) → 개문 시 4만원·파손교체 시 21만원 분기 안내 → 방문·처리 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 개문 4만원, 데드볼트/모티스 문제 교체 30만원, 비번분실 동반 시 파손교체 18~23만원. 도어락 결함 무상, 문틀어짐·결로 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 반복 클레임·소비자고발 언급 건은 우선순위 상향 처리. 다른 시건장치 잠김 여부도 확인.</div>
+          <div class="sample"><b>실제 처리 사례</b> [KDL-P8000S] KDL-P8000S/ (파주양우내안애) 9볼트건전지 사용안내/ 보증기간경과, 재연락오면 유상안내예정</div></div>
+    </div><div class="ccard" data-name="간헐적 소리음 발생" id="cat10">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.11</span><span class="cname">간헐적 소리음 발생</span>
+        <span class="cmeta">접수 263건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담수리 108 · 유상 86 · 무상 60 · 상담처리 9</div>
+          <div class="def"><b>증상 정의</b> 잠금 상태에서 문 움직임 시 경고음, 띠링/삑삑 반복음, 건전지 교체 후에도 지속되는 소음.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지를 알카라인 정품 전체로 교체 후 재확인(부족 시 경고음 다수).</li><li>문 움직임 시 울리는 경보는 잠금/센서 위치 문제일 수 있어 위치 확인.</li><li>비가림 없는 외부 설치는 습기·결로 영향 확인.</li><li>지속 시 증상 영상 확보 후 방문 접수.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 건전지·위치 자가조치 → 미해결 시 방문 접수(상담수리) → 점검·부품교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 수리 15만원, 교체 7~18만원~(모델별), 30만원 이상도. 도어락 결함 무상, 환경·과실 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 반복 AS·교환 요청 건은 숙련 기사 재배정 후 확실히 처리. 외부 처마/비가림 커버 환경 메모.</div>
+          <div class="sample"><b>실제 처리 사례</b> [UN-6400D] 상담사님께서는 제품의 증상을 확인한 후, 내부 결함이나 환경적 요인으로 인한 고장 가능성을 안내하였습니다. 제품의 제조 일자와 무상 AS 기간을 바탕으로 상담을 진행하였으며, 현재 당일 즉시 방문은 어려우나 기사님을 통한 점검 접수를 도와드리겠다고 안내했습니다. 또한, 방문 시 발생할 수 있는 기본 출장비(3만 원)와 제품 교체 시 예상 비용 등에 대해 설명하며 기사님을 통해 방문 일정을 조율할 수 있도록 안내를 마쳤습니다.</div></div>
+    </div><div class="ccard" data-name="일부숫자 안눌림" id="cat11">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.12</span><span class="cname">일부숫자 안눌림</span>
+        <span class="cmeta">접수 226건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 4 · 무상 46 · 유상 33 · 수리거부 1</div>
+          <div class="def"><b>증상 정의</b> 특정 숫자 한두 개가 눌리지 않아 비번 입력 불가, 출입 불가.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>9V 전원으로 개문 시도(외부 잠김 시).</li><li>건전지 교체·리셋 후 재시도.</li><li>특정 숫자 지속 불량은 키패드(PCB) 고장 → 방문 접수.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 자가조치 → 방문 접수(OB) → 키패드/기기 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 단종 시 수리 불가 → 동급 최신 모델 파손교체 25만원. 도어락 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> UN-325 등 노후 모델 특정번호 불량은 교체만 가능.</div>
+          <div class="sample"><b>실제 처리 사례</b> [B100] 상담사님께서는 무상 A/S 기간이 1년까지임을 안내하며 상황에 따라 비용이 발생할 수 있음을 설명하였습니다. 이후 고객님의 주소를 확인하여 수리 접수를 완료하였고, 방문에는 보통 30분에서 1시간 정도 소요될 예정이라고 안내하였습니다.</div></div>
+    </div><div class="ccard" data-name="수리거부" id="cat12">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.13</span><span class="cname">수리거부</span>
+        <span class="cmeta">접수 211건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 211</div>
+          <div class="def"><b>증상 정의</b> 현장/상담 단계에서 수리 진행이 성립되지 않은 건(타사 제품, 비용 미동의, 단순 문의 종결, 사용자 확인 미흡 등).</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>타사·잘못 연결 건은 정확한 제조사/센터 안내 후 종결.</li><li>비번 자동변경은 없음을 설명, 입력 과정 재확인 유도.</li><li>비용 안내 후 미동의 시 견적만 제공하고 보류.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">응대 → 사유 확인 → 안내/이관/견적 → 종결(완료 또는 보류)</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 해당 없음(미진행). 견적만 제공.</div></div>
+          <div class="note"><b>모델·특이사항</b> 타사(베스틴 등) 1644-5303 안내. 임대인 협의 필요 건은 재연락 대기.</div>
+          <div class="sample"><b>실제 처리 사례</b> [KDL-3250S] 상담사님께서는 도어락의 비밀번호가 자동으로 변경되는 경우는 없다고 설명하며, 번호를 입력하는 과정에서 확인이 미흡했거나 다른 요인이 있었을 가능성을 언급하셨습니다. 다만, 정해진 번호를 정확히 입력했음에도 오류음이 발생하는 경우에는 기계 자체의 고장으로 볼 수 있다고 안내하였으며, 반복적인 번호 입력 시 경보음이 발생하는 등의 현상은 설정 과정에서의 실수일 수 있음을 설명하였습니다.</div></div>
+    </div><div class="ccard" data-name="지문인식 안됨" id="cat13">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.14</span><span class="cname">지문인식 안됨</span>
+        <span class="cmeta">접수 207건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 4 · 무상 46 · 유상 18 · 수리거부 1</div>
+          <div class="def"><b>증상 정의</b> 지문만 인식 안 됨(번호는 정상), 인식 작동음도 없음, 등록 중 화면 꺼짐.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>지문 재등록: 등록버튼 후 같은 손가락 4회 연속 인식 → 등록버튼 종료.</li><li>건전지 정상인데 지문만 안 되면 외측 모듈/PCB 문제 가능.</li><li>리셋 매뉴얼 문자 안내 후 답장 확인.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 지문 재등록 안내 → 미해결 시 방문 접수 → 외측/PCB 점검·교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 외측+내측 PCB 교체 25만원, 교체 18~30만원. 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 자가설치 제품은 배선 재체결 우선 확인. 기사 현장 테스트 후 필요 시 제품 지참 교체.</div>
+          <div class="sample"><b>실제 처리 사례</b> [8000FS] 2026-04-27 (106동 304호) 지문이 되다안되다함.  리셋메뉴얼문자안내 답장확인예정</div></div>
+    </div><div class="ccard" data-name="제품 사용법미숙" id="cat14">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.15</span><span class="cname">제품 사용법미숙</span>
+        <span class="cmeta">접수 188건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 10 · 수리거부 1 · 무상 1</div>
+          <div class="def"><b>증상 정의</b> 조작 미숙으로 인한 미작동(자동잠금, 비번설정, 건전지교체 등) — 안내로 해결되는 비고장 건.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>터치형 자동잠금: 외부 번호판에 손바닥 3초 이상.</li><li>건전지커버: 실내측 안전잠금버튼 위쪽 홈을 누르며 위로 밀어 올림. 정품 알카라인 전체 교체.</li><li>마스터 등록은 문 연 상태에서 진행.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">응대 → 모델별 조작법 구두 안내 → 해결 확인 → 완료(상담처리). 미해결 시 영상 확인.</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 무상(상담처리).</div></div>
+          <div class="note"><b>모델·특이사항</b> 타사 모델은 해당사 안내(예: 베스틴 1644-5303).</div>
+          <div class="sample"><b>실제 처리 사례</b> [LS-300N] 상담사님께서는 해당 모델의 조치 방법으로 외부 번호판 부위를 손바닥으로 3초 이상 대고 있을 것을 안내하였으며, 고객님이 안내에 따라 조치한 후 문제가 해결되었음을 확인하였습니다.</div></div>
+    </div><div class="ccard" data-name="건전지 방전" id="cat15">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.16</span><span class="cname">건전지 방전</span>
+        <span class="cmeta">접수 150건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 6 · 유상 11 · 무상 10 · 수리거부 1</div>
+          <div class="def"><b>증상 정의</b> 새 건전지로 교체해도 한 달이 안 가는 조기 방전, 잦은 부족알림.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>반드시 알카라인 정품, 전부 동시 교체(망간·충전식 혼용 금지).</li><li>비상 시 9V로 개문 후 정품 교체.</li><li>교체에도 한 달 미만이면 기기 누설/소모 이상 → 방문 점검.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 정품 교체 안내 → 재발 시 방문 접수 → 점검·교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 수리 15만원, 교체 25만원. 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 편의점 건전지 교체 후 재연락 요청 사례 다수. 유튜브 '도어락 방전' 영상 안내 활용.</div>
+          <div class="sample"><b>실제 처리 사례</b> [UN-6700S-F] un-6700s-f-goldclass/ 구미산동읍 신당3로 15  골드디움 교체만25+연동기10</div></div>
+    </div><div class="ccard" data-name="핸들불량(내측케이스파손)" id="cat16">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.17</span><span class="cname">핸들불량(내측케이스파손)</span>
+        <span class="cmeta">접수 139건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 1 · 유상 49 · 무상 10 · 수리거부 2</div>
+          <div class="def"><b>증상 정의</b> 내측/외측 손잡이 빠짐·쳐짐, 내부 플라스틱 케이스 파손·덜렁거림.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>파손 부위 사진 문자 요청(커버 vs 케이스 구분).</li><li>핸들 쳐짐·빠짐은 대부분 수리 불가 → 케이스/기기 교체.</li><li>외측 손잡이 빠져 출입 불가 시 긴급 출동.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 사진 확인 → 방문 접수(OB) → 케이스/기기 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 내측케이스 교체(출장 포함) 약 7만원, 핸들/기기 교체 21~23만원. 과실·노후 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 실내측 핸들 쳐짐은 수리 불가, 교체만 가능 사례 다수.</div>
+          <div class="sample"><b>실제 처리 사례</b> [KDL-9050S] kdl-9050s 두정역범양레우스 고객 요청,문안쪽 도어락 플라스틱 떨어짐/부재내측케이스교체  7만원.</div></div>
+    </div><div class="ccard" data-name="연동 불량, 누락" id="cat17">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.18</span><span class="cname">연동 불량, 누락</span>
+        <span class="cmeta">접수 122건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 5 · 무상 23 · 유상 8 · 수리거부 1</div>
+          <div class="def"><b>증상 정의</b> 월패드/비디오폰 연동으로 문 열림 안 됨, 통신팩 분실, 인터폰 호출 시 미개방.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>연동 방식(2선/4선 접점) 및 통신팩 유무 확인.</li><li>모델명·건전지커버 연 내부 사진·연락처 문자 요청.</li><li>통신팩 단품 구매 가능 여부 확인.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 연동방식·사진 확인 → 방문 접수 → 연동기/통신팩 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 월패드연동기 약 10만원(기기 교체와 합산 시 +10만원). 구형 통신팩은 별도 확인.</div></div>
+          <div class="note"><b>모델·특이사항</b> 구형 비디오폰·월패드는 호환 확인 필수. 23년 이후 입주 아파트는 월패드 현관문 개폐 기능 확인.</div>
+          <div class="sample"><b>실제 처리 사례</b> [5500S] 상담사님께서는 정확한 문제 파악 및 확인을 위해 도어락 모델명과 건전지 커버를 연 내부 사진, 그리고 고객님의 연락처(제휴 일자 포함)를 문자로 보내달라고 요청하셨으며, 정보를 확인한 후 다시 연락을 드리겠다고 안내하였습니다.</div></div>
+    </div><div class="ccard" data-name="건전지 커버불량" id="cat18">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.19</span><span class="cname">건전지 커버불량</span>
+        <span class="cmeta">접수 121건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 1 · 무상 33 · 유상 6 · 수리거부 3</div>
+          <div class="def"><b>증상 정의</b> 건전지덮개 끝단 파손·헐거움으로 문 닫을 때 자꾸 떨어짐.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>덮개 단품 구매 안내(강화 보완품, 약 13,000원).</li><li>B2B 설치 단지는 단지·동호수 확인 후 처리.</li><li>파손 부위 사진 문자 확인.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 사진·단지 확인 → 덮개 발송/방문 교체 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 덮개 약 13,000원. 무상보증·B2B 조건 시 무상 처리 가능.</div></div>
+          <div class="note"><b>모델·특이사항</b> 기존 플라스틱 파손 잦던 모델은 보완 강화품으로 교체됨 안내.</div>
+          <div class="sample"><b>처리 메모 예시</b> [8000FS] 8000FS 117동 1903호 / 건전지덮개 소진 / [8000FS] 105동 802호  / AS센터 .</div></div>
+    </div><div class="ccard" data-name="데드볼트 걸림" id="cat19">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.20</span><span class="cname">데드볼트 걸림</span>
+        <span class="cmeta">접수 115건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 1 · 무상 24 · 유상 21 · 수리거부 1</div>
+          <div class="def"><b>증상 정의</b> 잠금은 되나 열림 안 됨, 데드볼트가 문틀에 살짝 걸쳐 잠김, 비번 입력 후 풀림소리 나도 미개방.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>비번+별표 입력 후 손잡이 잡고 문을 앞뒤로 강하게 흔들어 개방.</li><li>건전지 교체 후 재시도.</li><li>지속 시 모티스/열림닫힘버튼 불량 → 방문 접수.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 흔들기 임시조치 → 미해결 시 방문 접수 → 모티스/기기 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 모티스 교체 7만원, 기기 교체 18만원~, 노후 30만원~. 출장비 3~7~15만원 분기.</div></div>
+          <div class="note"><b>모델·특이사항</b> 열림닫힘버튼 무반응·수동개폐장치 미작동은 교체 신호. GT200 등 노후 모델 교체 18만원.</div>
+          <div class="sample"><b>실제 처리 사례</b> [250N-GL] 250n-gl 열림닫힘버튼 KMA03G2310U0481V4 /  3년사용. 보증기간경과.  교체비용 18만원</div></div>
+    </div><div class="ccard" data-name="내부에서 문 안열림" id="cat20">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.21</span><span class="cname">내부에서 문 안열림</span>
+        <span class="cmeta">접수 110건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 4 · 무상 35 · 유상 9</div>
+          <div class="def"><b>증상 정의</b> 실내에서 손잡이를 밀어도 반만 열리거나 무반응, 여러 번 충격을 줘야 열림 — 모티스/내부 개폐 불량.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>도어락 몸통을 잡고 당기거나 밀면서 안전잠금버튼을 눌러 개방 시도.</li><li>내부 개폐만 문제고 외부 정상이면 모티스 불량 가능 → 방문 접수.</li><li>시리얼·문 사진 문자 요청.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 임시 개방 안내 → 방문 접수(OB) → 모티스 우선 교체 점검 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 모티스 교체 7만원~. 도어락 결함 무상, 문·문틀 유격 유상(출장비 약 5만원).</div></div>
+          <div class="note"><b>모델·특이사항</b> 실내 갇힘 위험 건은 긴급 처리. 안전사고 우려 표명 시 우선 배차.</div>
+          <div class="sample"><b>실제 처리 사례</b> [JM-650D] 상담사님께서는 해당 제품이 구형 모델이라 부품 수리가 불가능하며, 기사 방문 시 제품 전체를 교체해야 한다고 안내하였습니다. 이에 따른 교체 비용은 약 21만 원임을 고지하였으며, 고객님께서는 비용 확인 후 추후 다시 연락하기로 하였습니다.</div></div>
+    </div><div class="ccard" data-name="터치 안됨" id="cat21">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.22</span><span class="cname">터치 안됨</span>
+        <span class="cmeta">접수 98건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 65 · 무상 20 · 유상 13</div>
+          <div class="def"><b>증상 정의</b> 터치 시 화면 자동 꺼짐, 숫자판 안 보임(감으로 누르면 열림), 스마트키·터치 동시 불가.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>9V 접촉 상태에서 터치+비번+별표로 개문.</li><li>건전지 교체·리셋 후 재시도.</li><li>걸쇠 미맞물림 가능 → 물리 조치 후 재시도.</li><li>지속 시 외부 터치 모듈 불량 → 방문 접수.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 9V/리셋 자가조치 → 방문 접수(OB) → 터치모듈/기기 점검·교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 수리 15만원, 교체 25만원. 단종은 교체만. 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 야간 접수는 익일 오전 기사 연락·방문 조율. 자가설치 건은 배선 확인 우선.</div>
+          <div class="sample"><b>실제 처리 사례</b> [8600S] 상담사님께서는 고객님의 상황을 확인한 후, 현장 점검을 위해 서비스 기사님을 배정하여 접수를 도와드리겠다고 안내하였습니다. 현재 시간이 늦어 정확한 방문 시간은 내일 오전 중 기사님이 직접 연락하여 조율할 예정임을 설명하였으며, 고객님의 요청에 따라 내일 오전 8시 이후 최대한 이른 시간에 방문할 수 있도록 기사님께 전달하겠다고 답변하였습니다.</div></div>
+    </div><div class="ccard" data-name="건전지교체후멜로디발생" id="cat22">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.23</span><span class="cname">건전지교체후멜로디발생</span>
+        <span class="cmeta">접수 92건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 1 · 무상 10 · 유상 9</div>
+          <div class="def"><b>증상 정의</b> 건전지 교체 후 잠금 시마다 멜로디/경고음 지속, 비상전원으로만 개방.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>기기 물기·습기 여부 확인, 건전지 제거 후 재장착 테스트.</li><li>정품 알카라인 전체 교체.</li><li>지속 시 설치불량/기기 문제 → 방문 접수, 제조일 스티커 사진 요청.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 건전지·습기 자가조치 → 방문 접수 → 점검·교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 현장 견적. 무상보증 내 결함 무상, 결로·습기 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 제품 보유 시 당일, 미보유 시 익일 방문. 설치점 연락처 확인.</div>
+          <div class="sample"><b>실제 처리 사례</b> [GALAXIA-F] 상담사는 고객님의 문제를 확인하고 제품에 물기나 습기가 없는지 확인하며 배터리를 제거하여 테스트해 보라고 안내했습니다. 또한 고객님의 주소와 설치점 전화번호를 확인하여 제품을 직접 방문하여 문제를 해결하겠다고 약속했습니다. 추가적으로 제품 내부 기기의 제조일 스티커 사진을 함께 보내달라고 요청했으며, 제품이 있는 경우 오늘 바로 방문 가능하다고 설명했습니다. 제품이 없는 경우에는 다음 날 방문 예정임을 언급하며 문자 메시지로 연락드리겠다고 안내했습니다.</div></div>
+    </div><div class="ccard" data-name="방문일정문의" id="cat23">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.24</span><span class="cname">방문일정문의</span>
+        <span class="cmeta">접수 71건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 11 · 무상 3</div>
+          <div class="def"><b>증상 정의</b> 접수 후 기사 미연락 독촉, 방문일정 확인·변경, 설치 일정 확인, 배송 지연 문의.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>접수내역 즉시 확인 후 담당기사 빠른 연락 조치, 불편 사과.</li><li>일정 변경은 담당부서 확인 후 회신, 불가 시 재안내.</li><li>구체 방문시간은 기사 사전연락으로 조율.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">문의 → 접수상태 확인 → 담당자/기사 전달 → 일정 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 해당 없음(일정 안내).</div></div>
+          <div class="note"><b>모델·특이사항</b> 미연락 독촉은 누락 여부 확인·사과 우선. 신제품 생산지연 시 배송 일정 별도 안내.</div>
+          <div class="sample"><b>실제 처리 사례</b> [중복접수(접수문의)] 동대문 용두열쇠상담사님께서는 현재 설치된 제품 모델에는 휴대폰 앱 연동 기능이 포함되어 있지 않음을 안내하였습니다. 고객님께서 확인하신 내용은 통합 설명서에 기재된 다른 모델(AI 관련 기능 등)의 정보이며, 이번에 설치된 제품은 번호 입력 및 카드, 지문 인식 등의 방식으로 작동함을 설명하며 오해를 바로잡아 드렸습니다.</div></div>
+    </div><div class="ccard" data-name="건전지 조기방전" id="cat24">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.25</span><span class="cname">건전지 조기방전</span>
+        <span class="cmeta">접수 61건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 44 · 무상 13 · 유상 3 · 수리거부 1</div>
+          <div class="def"><b>증상 정의</b> 교체 후 수일~한 달 내 재방전, 월 수회 교체 필요한 비정상 소모.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>정품 알카라인 전체 교체로 1차 확인.</li><li>잦은 재방전+소음·잠김 동반이면 설치/기기 문제 가능 → 영상 확보.</li><li>설치 3개월 내면 무상 처리 안내.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 정품 교체 → 재발 시 방문 접수 → 점검·교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 현장 견적. 무상보증·설치초기 무상, 노후·과실 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 설치자 통화로 시공 이력 확인 후 자재 준비·방문일 조율.</div>
+          <div class="sample"><b>실제 처리 사례</b> [ST150] 상담사님께서는 고객님의 주소지를 확인한 후 해당 건에 대해 기사님께 접수를 완료하였으며, 구체적인 방문 일정은 담당 기사님이 직접 연락하여 안내할 예정임을 설명하였습니다.</div></div>
+    </div><div class="ccard" data-name="경보음 발생" id="cat25">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.26</span><span class="cname">경보음 발생</span>
+        <span class="cmeta">접수 58건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 3 · 유상 1</div>
+          <div class="def"><b>증상 정의</b> 문 열 때마다 또는 상시 경보음 지속.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지 교체·습기 확인.</li><li>잠금/센서 위치 점검.</li><li>지속 시 방문 점검.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 자가조치 → 방문 접수 → 점검·교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 수리 7만원~, 교체 30만원, 취소(개문)출장비 3만원. 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 설치 시기·제조일 확인 후 유무상 판정.</div>
+          <div class="sample"><b>실제 처리 사례</b> [UN-P8000S] un-p8000s / 안성시 고산면  2021-06월설치7만원~ 교체30만원 , 취소출장비3</div></div>
+    </div><div class="ccard" data-name="설치 불량" id="cat26">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.27</span><span class="cname">설치 불량</span>
+        <span class="cmeta">접수 54건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 2 · 유상 5 · 무상 4</div>
+          <div class="def"><b>증상 정의</b> 자가/시공 설치 불량(손잡이 역방향, 볼트 들뜸, 배선 미체결 등).</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>배선 재체결·손잡이 방향 등 1차 확인.</li><li>박스/제품 모델명 사진 요청.</li><li>설치 환경 문제는 출장비 안내.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 자가확인 → 방문 접수 → 재설치/교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 제품 결함 무상, 문 유격 등 설치환경 출장비 약 5만원.</div></div>
+          <div class="note"><b>모델·특이사항</b> 자가설치 건은 배선·방향 우선 점검.</div>
+          <div class="sample"><b>실제 처리 사례</b> [IDL-400M] 상담사님께서는 고객님의 정보를 확인한 후, 담당 기사가 방문 전 미리 연락을 드릴 예정임을 안내하였습니다. 또한, 제품 결함이 아닌 문 자체의 유격 문제일 경우 수리 비용이 발생할 수 있으며, 출장비는 약 5만 원 정도 발생할 수 있음을 설명하며 기사님을 통해 상세 안내를 받으실 수 있도록 조치하였습니다.</div></div>
+    </div><div class="ccard" data-name="카드키 안됨" id="cat27">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.28</span><span class="cname">카드키 안됨</span>
+        <span class="cmeta">접수 52건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 31 · 무상 11 · 유상 10</div>
+          <div class="def"><b>증상 정의</b> 스마트키/카드키 미인식, 재등록 불가, 등록 자체 안 됨.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>카드 삭제 후 재등록 시도(마스터/공카드 보유 시).</li><li>재등록 불가 시 기기 교체 안내.</li><li>구형 모델은 카드키만 단독 불량 사례 있음.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 재등록 안내 → 미해결 시 방문/교체 접수 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 재등록 무상, 모듈 불량 시 교체 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 비번분실 동반 건은 파손교체로 분기.</div>
+          <div class="sample"><b>실제 처리 사례</b> [KDL-P8100S] [KOCOM] KDL-P8100S 신천역에피트 104동 1804호 카드 재등록 확인중 전화가 자꾸끊어짐</div></div>
+    </div><div class="ccard" data-name="제품 파손, 연소" id="cat28">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.29</span><span class="cname">제품 파손, 연소</span>
+        <span class="cmeta">접수 41건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 3 · 유상 5</div>
+          <div class="def"><b>증상 정의</b> 외부 충격·화재·연소 등으로 기기 파손.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>안전 우선(연소 시 건전지 제거), 사진 확인.</li><li>파손 정도에 따라 교체 안내.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 사진 확인 → 방문 교체 접수 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 교체 유상(현장 견적).</div></div>
+          <div class="note"><b>모델·특이사항</b> 과실/외부요인 파손은 유상.</div>
+          <div class="sample"><b>처리 메모 예시</b> [8600S] 외측크롬 8600S</div></div>
+    </div><div class="ccard" data-name="설치 요청" id="cat29">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.30</span><span class="cname">설치 요청</span>
+        <span class="cmeta">접수 40건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 27 · 유상 11 · 무상 2</div>
+          <div class="def"><b>증상 정의</b> 홈쇼핑·온라인 구매 제품 신규 설치, 부품 규격 불일치로 설치 불가.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>구매처·모델·주소 확인 후 설치 접수.</li><li>지지대 규격(예: 25mm vs 35mm) 등 불일치는 사진 확인 후 자재 재발송.</li><li>타공 필요 시 추가 출장비 안내.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 모델·구성품 확인 → 설치 기사 배정 → 방문 설치 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 설치 출장비 5만원~(타공 등), 신규 설치 동급 35만원 수준.</div></div>
+          <div class="note"><b>모델·특이사항</b> 기사 미연락 설치 클레임은 즉시 담당기사 연락 조치.</div>
+          <div class="sample"><b>실제 처리 사례</b> [중복접수(접수문의)] IDL-300FWKH 설치의뢰/ 방문일정문의상담사님께서는 고객님의 상황을 이해하며 담당 기사에게 연락하여 즉시 전화드릴 것을 약속드리고 사과의 말씀을 드렸습니다.</div></div>
+    </div><div class="ccard" data-name="등록 버튼 불량" id="cat30">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.31</span><span class="cname">등록 버튼 불량</span>
+        <span class="cmeta">접수 34건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 26 · 유상 7 · 수리거부 1</div>
+          <div class="def"><b>증상 정의</b> 등록버튼을 눌러도 번호판 불이 안 들어와 등록·설정 불가.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>문 연 상태에서 등록 시도, 유리문은 떼어 확인.</li><li>건전지 교체 후 재시도.</li><li>지속 시 PCB 불량 → 방문/교체.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 자가조치 → 방문 접수 → PCB/기기 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 교체 유상(현장 견적). 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 등록버튼 불 미점등은 키패드 고장 신호.</div>
+          <div class="sample"><b>처리 메모 예시</b> [ST200] st200 고장/ 교체만가능 / [JS-220D] 원룸./  js220  등록버튼소리안남 고장.  교체비용 18만원</div></div>
+    </div><div class="ccard" data-name="전원불(건전지접촉안됨)" id="cat31">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.32</span><span class="cname">전원불(건전지접촉안됨)</span>
+        <span class="cmeta">접수 33건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 1 · 유상 3</div>
+          <div class="def"><b>증상 정의</b> 건전지 접촉 불량으로 전원 미인가, 설치 중 미작동.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지 단자 이물/접촉 확인, 재장착.</li><li>정품 교체 후 재시도.</li><li>지속 시 방문 점검.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 접촉 확인 → 방문 접수 → 점검·교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 수리 13만원, 교체 21만원, 설치 35만원. 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 설치 중 건은 설치 기사 연계.</div>
+          <div class="sample"><b>실제 처리 사례</b> [UN-P8000BWS] 상담사님께서는 고객님의 상황을 확인하시고, 설치 비용으로 약 삼십오 만원을 예상하며 고객님의 주소를 확인했습니다. 그리고 기술자가 최대한 빠르게 방문하여 설치를 진행할 예정임을 안내드리고 접수를 완료했습니다.</div></div>
+    </div><div class="ccard" data-name="안밖에서 문안열림(못나옴)" id="cat32">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.33</span><span class="cname">안밖에서 문안열림(못나옴)</span>
+        <span class="cmeta">접수 33건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담수리 19 · 무상 7 · 유상 5 · 상담처리 2</div>
+          <div class="def"><b>증상 정의</b> 안팎 모두 열리지 않아 갇힘, 손잡이 헛돔 — 긴급 상황.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>KC 인증 스티커 사진으로 모델 확인.</li><li>노후 모델은 파손 후 교체.</li><li>갇힘 위험 긴급 출동 우선 배차.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 모델 확인 → 긴급 출동(OB) → 개문/파손교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 파손교체 25만원 수준. 노후·과실 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 실내 갇힘은 안전 최우선, 최단시간 방문 배정.</div>
+          <div class="sample"><b>실제 처리 사례</b> [XG-7] 상담사님께서는 제품의 모델명 확인을 위해 도어락 측면의 KC 인증 스티커 사진 촬영을 요청하셨으며, 해당 제품이 2014년식 노후 모델임을 확인하여 파손 후 교체가 필요함을 안내하셨습니다. 제품 규격에 따른 교체 비용은 25만 원임을 고지하였고, 내일 오전 10시 이후에 기사님이 방문하여 조치할 수 있도록 접수를 도와드렸습니다.</div></div>
+    </div><div class="ccard" data-name="레치걸림" id="cat33">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.34</span><span class="cname">레치걸림</span>
+        <span class="cmeta">접수 31건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 16 · 무상 11 · 유상 4</div>
+          <div class="def"><b>증상 정의</b> 비번 정상인데 잠금해제음 후 미개방, 래치/걸쇠 걸림.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>비번+별표 후 손잡이 잡고 문 강하게 흔들기.</li><li>미해결 시 방문 점검.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 임시조치 → 방문 접수 → 점검·교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 설치 초기 무상(설치불량 판명 시), 과실은 파손교체 최대 21만원.</div></div>
+          <div class="note"><b>모델·특이사항</b> 설치 직후 건은 무상 우선.</div>
+          <div class="sample"><b>실제 처리 사례</b> [TM-3200S] 상담사님께서는 비밀번호와 별표를 누른 후 손잡이를 잡고 문을 강하게 흔들어 볼 것을 안내하며 임시 조치 방법을 설명드렸습니다. 이후 현장 점검을 위해 서비스 기사 방문 접수를 진행하였으며, 설치한 지 얼마 되지 않은 시점이라 무상 AS 대상이나 만약 설치 불량으로 판명될 경우 파손 및 교체 비용(최대 21만 원)이 발생할 수 있음을 고지하였습니다. 기사님은 30분에서 1시간 이내에 방문할 예정이며, 고객님이 요청하신 연락처로 연락드리도록 접수를 완료하였습니다.</div></div>
+    </div><div class="ccard" data-name="모티스 불량" id="cat34">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.35</span><span class="cname">모티스 불량</span>
+        <span class="cmeta">접수 30건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 17 · 무상 11 · 유상 2</div>
+          <div class="def"><b>증상 정의</b> 모티스 모터·걸쇠 동작 이상, 데드볼트 돌출/후퇴 불량.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>몸통 잡고 당기며 안전잠금버튼 조작.</li><li>모티스 우선 교체 점검 접수.</li><li>시리얼 사진 요청.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 임시조치 → 방문 접수(모티스 우선) → 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 모티스 교체 7만원~. 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 외부 정상·내부 개폐만 불량이면 모티스 가능성 높음.</div>
+          <div class="sample"><b>실제 처리 사례</b> [KDL-P8100S] 상담사님께서는 고객님의 정확한 모델명 확인 및 수동 잠금 버튼 작동 여부를 통해 제품 상태를 점검하였습니다. 기계적인 결함(걸쇠 미작동)으로 판단되어 즉시 A/S 접수를 진행하였으며, 내일 오전 중으로 서비스 기사가 방문 일정을 조율하기 위해 고객님의 연락처로 전화드릴 예정임을 안내하였습니다.</div></div>
+    </div><div class="ccard" data-name="led 불량" id="cat35">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.36</span><span class="cname">LED 불량</span>
+        <span class="cmeta">접수 26건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 18 · 유상 5 · 무상 3</div>
+          <div class="def"><b>증상 정의</b> 번호판 LED 흐림·미점등, 숫자 흐림.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지 교체 후 확인.</li><li>지속 시 키패드 교체 점검.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 자가조치 → 방문 접수 → 키패드 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 현장 견적. 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 전수조사 제외 세대 등 단지 이력 메모.</div>
+          </div>
+    </div><div class="ccard" data-name="스크레치, 오염, 변색" id="cat36">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.37</span><span class="cname">스크레치, 오염, 변색</span>
+        <span class="cmeta">접수 23건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 14 · 유상 6 · 무상 3</div>
+          <div class="def"><b>증상 정의</b> 외관 스크래치·오염·변색 등 외관 하자.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>사진 확인.</li><li>기능 이상 동반 여부 확인 후 처리.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 사진 확인 → 처리방안 안내 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 외관 하자는 사안별 판정.</div></div>
+          <div class="note"><b>모델·특이사항</b> 기능 정상 외관 건은 사진 선확인.</div>
+          <div class="sample"><b>실제 처리 사례</b> [KDL-8500] 상담사님께서는 고객님의 상황을 확인하며 모델명과 아파트 정보를 확인 후 사진 촬영을 요청하여 문제를 진단하고자 했습니다. 사진과 고객님의 정보를 확인 후 연락드리겠다는 약속과 함께 문자 번호(팔로)로 사진을 보내도록 안내했습니다.</div></div>
+    </div><div class="ccard" data-name="건전지 누액" id="cat37">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.38</span><span class="cname">건전지 누액</span>
+        <span class="cmeta">접수 12건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 6 · 유상 5 · 수리거부 1</div>
+          <div class="def"><b>증상 정의</b> 건전지 누액·과열로 단자 손상·오작동.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>즉시 건전지 제거, 단자 청소.</li><li>과열·누액 동반 시 기기 점검 접수.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 안전조치 → 방문 점검 → 단자/기기 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 현장 견적. 제품 결함성 과열은 무상 우선.</div></div>
+          <div class="note"><b>모델·특이사항</b> 과열은 안전 이슈로 신속 처리.</div>
+          <div class="sample"><b>처리 메모 예시</b> [KDL-670S] 670s 건전지누액추정. 방화문에 흐름. / [HB-7000S] 건전지누액/ 건전지바꿔야할수있음. hb7000/ 25만원</div></div>
+    </div><div class="ccard" data-name="데드볼트 튀어나옴" id="cat38">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.39</span><span class="cname">데드볼트 튀어나옴</span>
+        <span class="cmeta">접수 9건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 8 · 유상 1</div>
+          <div class="def"><b>증상 정의</b> 데드볼트가 비정상적으로 돌출된 채 유지.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>안전잠금/개폐버튼 재조작.</li><li>지속 시 모티스 점검 접수.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 재조작 안내 → 방문 접수 → 모티스 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 모티스 교체 7만원~. 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 문틀 간섭 여부 동반 확인.</div>
+          <div class="sample"><b>처리 메모 예시</b> [UN-325S] 325s /데드볼트동작이상. 고장 / [SS725B] ss725b 열림닫힘버튼에 데드볼트 움직임없음.</div></div>
+    </div><div class="ccard" data-name="결로, 실내사용" id="cat39">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.40</span><span class="cname">결로, 실내사용</span>
+        <span class="cmeta">접수 8건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 유상 4 · 상담처리 3 · 무상 1</div>
+          <div class="def"><b>증상 정의</b> 실내측 결로·습기로 인한 오작동.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>환기·건조 후 재확인, 건전지 점검.</li><li>지속 시 방문 점검.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 건조 안내 → 방문 접수 → 점검 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 결로·습기 원인은 유상(출장비 포함).</div></div>
+          <div class="note"><b>모델·특이사항</b> 결로는 무상보증 예외(유상) 사유.</div>
+          <div class="sample"><b>처리 메모 예시</b> [8000FS] 습기결로 무상처리 할수없음</div></div>
+    </div><div class="ccard" data-name="윈도우 들뜸" id="cat40">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.41</span><span class="cname">윈도우 들뜸</span>
+        <span class="cmeta">접수 8건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 6 · 무상 2</div>
+          <div class="def"><b>증상 정의</b> 키패드 윈도우(투명창) 들뜸·이격.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>사진 확인.</li><li>들뜸 정도에 따라 케이스/윈도우 교체.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 사진 확인 → 방문 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 부품 교체(현장 견적). 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 외관 하자는 사진 선확인.</div>
+          <div class="sample"><b>처리 메모 예시</b> [TM-3200S] 외측이 바디에서 벌어짐.  설치얼마안됨 사용자 010-8986-1604</div></div>
+    </div><div class="ccard" data-name="방화문 걸림" id="cat41">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.42</span><span class="cname">방화문 걸림</span>
+        <span class="cmeta">접수 8건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 8</div>
+          <div class="def"><b>증상 정의</b> 방화문 틀/유격으로 도어락 작동 간섭, 바람 유입 클레임.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>방화문 자체 문제와 도어락 문제 구분 — 방화문 업체 선조치 확인.</li><li>도어락 손잡이 측 바람은 도어락 측 점검 접수.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수(이관 포함) → 방화문/도어락 구분 → 방문 점검 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 도어락 측 결함 무상, 문틀·환경 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 방화문업체↔도어락업체 이관 접수 건 출처 명확화.</div>
+          <div class="sample"><b>처리 메모 예시</b> [KDL-P8000WS] kdl-p8000s / 구미하늘채디어반 207-2101호</div></div>
+    </div><div class="ccard" data-name="문유격문제(밀어서잠김)" id="cat42">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.43</span><span class="cname">문유격문제(밀어서잠김)</span>
+        <span class="cmeta">접수 8건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 7 · 유상 1</div>
+          <div class="def"><b>증상 정의</b> 문 유격으로 밀어야 잠김, 버튼 후 손잡이 올려야 열림, 위치·센서 정렬 문제.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>닫을 때 센서 맞춰 닫고, 열 때 한 번에 안 열리면 위치 조정 안내.</li><li>제조일 스티커 사진 요청 후 정밀 조회.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 위치조정 안내 → 미해결 시 방문 접수 → 점검 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 문·문틀 유격은 유상(출장비), 도어락 결함은 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 샷시문 위치문제 다수 — 설치 조정으로 해결 가능.</div>
+          <div class="sample"><b>실제 처리 사례</b> [7100S] 상담사님께서는 정확한 제품 정보 및 설치 날짜를 확인하기 위해 기기 내부 측면에 부착된 제조 정보 스티커 사진을 요청하셨습니다. 고객님의 연락처로 문자를 발송할 예정이니, 해당 정보를 확인하여 답장을 보내주시면 이를 바탕으로 상세히 조회한 후 다시 전화를 드려 안내해 드리기로 하였습니다.</div></div>
+    </div><div class="ccard" data-name="앱(불루투스)기능문의" id="cat43">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.44</span><span class="cname">앱(불루투스)기능문의</span>
+        <span class="cmeta">접수 8건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 7 · 유상 1</div>
+          <div class="def"><b>증상 정의</b> 블루투스/앱 연동 기능 문의, 관련 AS 일정 확인.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>해당 모델 앱·블루투스 지원 여부 확인(구형 미지원).</li><li>접수건은 담당부서 확인 후 회신.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">문의 → 지원여부 확인 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 해당 없음(기능 안내).</div></div>
+          <div class="note"><b>모델·특이사항</b> 신규 모델 전용 기능, 구형 모듈 미제공.</div>
+          <div class="sample"><b>실제 처리 사례</b> [LG-300S] 상담사님께서는 고객님의 정보를 확인하였으며, 해당 부서에 다시 한번 확인하여 조속히 연락을 드릴 수 있도록 조치하겠다고 안내하였습니다.</div></div>
+    </div><div class="ccard" data-name="oc 버튼 불량" id="cat44">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.45</span><span class="cname">OC 버튼 불량</span>
+        <span class="cmeta">접수 7건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 7</div>
+          <div class="def"><b>증상 정의</b> OC(열림닫힘) 버튼 동작 이상.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지 교체 후 재시도.</li><li>무반응 시 기기 교체 점검.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 자가조치 → 방문 접수 → 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 기기 교체 18만원~. 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 열림닫힘버튼 무반응은 교체 신호.</div>
+          </div>
+    </div><div class="ccard" data-name="더블클릭(투터치)" id="cat45">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.46</span><span class="cname">더블클릭(투터치)</span>
+        <span class="cmeta">접수 7건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 7</div>
+          <div class="def"><b>증상 정의</b> 한 번에 동작 안 하고 두 번 눌러야 작동(투터치).</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>설정/펌웨어 상 동작 방식 확인, 모델별 사용법 안내.</li><li>지속 시 키패드 점검.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 사용법 안내 → 미해결 시 방문 접수 → 점검 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 현장 견적. 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 사용법/설정 문제와 고장 구분.</div>
+          </div>
+    </div><div class="ccard" data-name="스트라이커 문제" id="cat46">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.47</span><span class="cname">스트라이커 문제</span>
+        <span class="cmeta">접수 4건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 4</div>
+          <div class="def"><b>증상 정의</b> 스트라이커(문틀 걸림쇠) 정렬·간섭 문제, 문틀 바람 유입.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>스트라이커 정렬·문틀 상태 확인.</li><li>방화문/문틀 측 문제는 해당 업체 이관.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수(이관 포함) → 구분 → 방문 점검 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 도어락 측 결함 무상, 문틀 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 입주 단지 하자 이관 건 출처 기록.</div>
+          <div class="sample"><b>실제 처리 사례</b> [KDL-P8000S] 강원 원주시 포란재로 49 (태장동, 원주 동광뷰웰 레이크포레 /KDL-P8000S [D.Gray/B2B]</div></div>
+    </div><div class="ccard" data-name="블링크현상(외부깜빡거림)" id="cat47">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.48</span><span class="cname">블링크현상(외부깜빡거림)</span>
+        <span class="cmeta">접수 4건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 4</div>
+          <div class="def"><b>증상 정의</b> 외부 키패드가 깜빡거리며 정상 동작 안 함.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지 교체·리셋 후 확인.</li><li>지속 시 외부 모듈 점검.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 자가조치 → 방문 접수 → 모듈 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 현장 견적. 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 간헐 깜빡임은 영상 확보 권장.</div>
+          </div>
+    </div><div class="ccard" data-name="결로, 실외사용" id="cat48">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.49</span><span class="cname">결로, 실외사용</span>
+        <span class="cmeta">접수 2건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 유상 2</div>
+          <div class="def"><b>증상 정의</b> 실외 노출·우수로 인한 결로·습기 오작동.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>비가림/방수 환경 확인, 건조 후 재확인.</li><li>지속 시 방문 점검.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 건조·환경 안내 → 방문 접수 → 점검 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 결로·습기 원인 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 처마·비가림커버 등 설치환경 메모, 방수형 권장.</div>
+          </div>
+    </div><div class="ccard" data-name="조립불량" id="cat49">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.50</span><span class="cname">조립불량</span>
+        <span class="cmeta">접수 2건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 무상 1 · 상담처리 1</div>
+          <div class="def"><b>증상 정의</b> 조립 상태 불량으로 인한 작동 이상.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>재조립·배선 확인.</li><li>지속 시 방문 점검.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 확인 → 방문 접수 → 재조립/교체 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 제품 결함 무상, 자가조립 과실 유상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 시공 이력 확인.</div>
+          <div class="sample"><b>처리 메모 예시</b> [9050S(무로고)] 9050 / 9050S-F [로고없음]</div></div>
+    </div><div class="ccard" data-name="더스트박스 불량, 누락" id="cat50">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.51</span><span class="cname">더스트박스 불량, 누락</span>
+        <span class="cmeta">접수 1건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 1</div>
+          <div class="def"><b>증상 정의</b> 더스트박스(부속) 불량·누락.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>부속 누락 확인 후 발송/방문 보완.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 확인 → 보완 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 누락은 무상 보완.</div></div>
+          <div class="note"><b>모델·특이사항</b> 구성품 점검.</div>
+          </div>
+    </div><div class="ccard" data-name="교환,환불" id="cat51">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.52</span><span class="cname">교환,환불</span>
+        <span class="cmeta">접수 1건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 1</div>
+          <div class="def"><b>증상 정의</b> 제품 교환·환불 요청.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>구매처·구매일·결함 사유 확인.</li><li>반복 불량 입증(영상) 후 교환 절차 안내.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 사유 확인 → 담당부서 협의 → 교환/환불 처리 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 결함 입증 시 무상 교환, 단순변심은 정책에 따름.</div></div>
+          <div class="note"><b>모델·특이사항</b> 반복 AS 후 미해결 건은 숙련기사 재방문·교환 우선.</div>
+          </div>
+    </div><div class="ccard" data-name="윈도우불량(들뜸)" id="cat52">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.53</span><span class="cname">윈도우불량(들뜸)</span>
+        <span class="cmeta">접수 1건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 무상 1</div>
+          <div class="def"><b>증상 정의</b> 윈도우(투명창) 불량·들뜸.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>사진 확인 후 부품 교체.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 사진 → 방문 교체 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 부품 교체(현장 견적). 무상보증 내 결함 무상.</div></div>
+          <div class="note"><b>모델·특이사항</b> 외관 하자 사진 선확인.</div>
+          </div>
+    </div><div class="ccard" data-name="보상판매" id="cat53">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.54</span><span class="cname">보상판매</span>
+        <span class="cmeta">접수 1건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 유상 1</div>
+          <div class="def"><b>증상 정의</b> 구형 제품 보상판매(트레이드인) 문의.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>현 모델·상태 확인, 보상 조건 안내.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">문의 → 조건 안내 → 진행 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 정책에 따른 보상가 차감.</div></div>
+          <div class="note"><b>모델·특이사항</b> 단종·노후 모델 교체 유도 시 활용.</div>
+          <div class="sample"><b>처리 메모 예시</b> [UR-330N-GL] 300n-gl /  교체비용 18만원</div></div>
+    </div><div class="ccard" data-name="제품불량" id="cat54">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.55</span><span class="cname">제품불량</span>
+        <span class="cmeta">접수 1건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 무상 1</div>
+          <div class="def"><b>증상 정의</b> 불 안 들어옴+터치 안 됨+열림닫힘버튼 무반응 등 복합 완전 고장.</div>
+          <div class="sec"><b>1차 자가조치</b><ul><li>건전지·리셋·9V 순차 시도.</li><li>전 기능 무반응이면 기기 교체.</li></ul></div>
+          <div class="sec"><b>처리 흐름</b><div class="flow">접수 → 자가조치 → 방문 접수 → 교체 → 회신 → 완료</div></div>
+          <div class="row2"><div class="cost"><b>유무상·비용</b> 도어락 결함 무상, 그 외 유상(출장비 3만원~).</div></div>
+          <div class="note"><b>모델·특이사항</b> 설치 후 단기 완전고장은 제품불량 무상 우선.</div>
+          <div class="sample"><b>실제 처리 사례</b> [7100S] 2025년 가을설치/ 불안들어옴. 터치안됨. 열림닫힘버튼 반응없음, 도어락문제는 무상,/ 그외유상 출장비3~ 추가비용</div></div>
+    </div><div class="ccard" data-name="안면인식 안됨" id="cat55">
+      <div class="ccard-h" onclick="this.parentElement.classList.toggle('open')">
+        <span class="cnum">5.56</span><span class="cname">안면인식 안됨</span>
+        <span class="cmeta">접수 1건</span><span class="caret">▾</span>
+      </div>
+      <div class="ccard-b"><div class="meta-line">처리구분: 상담처리 1</div><div class="def">동일 계열 상위 증상에 준하여 처리.</div></div>
+    </div></div><div class="empty" id="catEmpty" style="display:none">검색 결과 없음</div></section>
+
+<section id="s6"><h2 class="sh">6. 모델별 특이사항 (단종·수리불가·교체전용)</h2>
+<p style="font-size:13px">아래 모델은 단종·부품수급 불가로 동급 최신 모델 파손교체 처리. 접수 시 「수리 불가, 교체만 가능」 사전 고지.</p>
+<table class="t"><tr><th>모델</th><th>처리 메모(상담이력 근거)</th></tr><tr><td class="m">UN-6700S-F</td><td>un-6700s-f-goldclass/ 구미산동읍 신당3로 15 골드디움 교체만25+연동기10</td></tr><tr><td class="m">UN-220D-GL</td><td>UN-220S-GL/수리불가 교체18안내</td></tr><tr><td class="m">ST200</td><td>st200 고장/ 교체만가능</td></tr><tr><td class="m">UN-3000D</td><td>UN-3000 /삐리릭소리나면서 잠금안됨/사진상 부품없을수 있는제품으로 기기교체만가능비용안내/임대인과 상의후 재연락예정/접수x UN-3000 교체만가능 21만원</td></tr><tr><td class="m">KDL-3250S</td><td>KDL-3250S/ 비디오폰 / 기기교체만가능안내/비용안내/구형 통신팩만 구매가능한지</td></tr><tr><td class="m">UN-3150S</td><td>un-3150s 고장. 수리불가 교체 21만원</td></tr><tr><td class="m">320S-GL</td><td>320S-GL/수리불가 교체18안내/ 비밀번호분실음</td></tr><tr><td class="m">UN-3200S</td><td>상담사님께서는 해당 모델이 단종되어 수리(AS) 대신 제품 교체가 필요함을 안내하였습니다. 현재 접수 시 교체 비용은 24만 원이며, 이는 제품 가격과 설치 서비</td></tr><tr><td class="m">UN-6500S-ROYAL</td><td>상담사님께서는 해당 도어락 모델이 단종되어 부품 수급이 어렵고 키패드 고장으로 인해 수리가 불가능함을 안내하며, 제품 교체가 필요함을 설명하였습니다. 이후 고객님</td></tr><tr><td class="m">PM900V</td><td>pm900V 안전잠금버튼 반응없음. 수리안됨교체만가능. 4~5년 / 8~교체비용 30~40만원안내</td></tr><tr><td class="m">UN-6700S</td><td>해당 모델은 단종되어 수리가 불가능하며, 현장에서 제품 파손 후 동일 급의 최신 모델로 교체해야 함을 안내드렸습니다. 교체 비용은 25만 원이며, 기사님이 방문 </td></tr><tr><td class="m">JU-300</td><td>ju300 수리불가/ 유리문교체비용 18만원</td></tr><tr><td class="m">R600-S</td><td>r600-s 번호판 깜박임. 2020-07제조 / 교체만가능수리비용 10만원 안내</td></tr><tr><td class="m">JM-640D</td><td>JM-640/ 먹통/기기교체만가능안내(25만원)유상</td></tr><tr><td class="m">UN-7200B</td><td>짱그마k2 조기방전 수리불가 교체필요</td></tr><tr><td class="m">JM-650D</td><td>jm650 고장. 점검~ 교체만 가능</td></tr><tr><td class="m">JM-650S</td><td>jm650 고장. 점검~ 교체만 가능</td></tr><tr><td class="m">UN-3250D</td><td>3250d 수리불가</td></tr><tr><td class="m">XG-2(조이락 기타단종)</td><td>XG-2/수리불가 교체안내/ 교체21</td></tr><tr><td class="m">UN-3250S</td><td>atlas/도어락에서 계속 삑 삑 하는 소리남/ 교체만가능 21만원안내</td></tr><tr><td class="m">JM-600</td><td>jm600, 교체만 가능함 25만원</td></tr><tr><td class="m">JM-670S</td><td>대전 평화로운 아파트JM670D/ 교체만 가능25</td></tr><tr><td class="m">XG-3</td><td>xg-3 / 수리불가</td></tr><tr><td class="m">UN-320S(오리온)</td><td>320gl 경보음/ 수리불가 교체필요교체비용 18만원</td></tr></table>
+<h3 class="sub">최다 접수 모델</h3><div><span class="tm">8000FS <b>537</b></span><span class="tm">KDL-P8100S <b>232</b></span><span class="tm">8600FS <b>150</b></span><span class="tm">5500S <b>116</b></span><span class="tm">8600S <b>107</b></span><span class="tm">GALAXIA-F <b>94</b></span><span class="tm">UN-6700S <b>93</b></span><span class="tm">7100S <b>84</b></span><span class="tm">GT100 <b>81</b></span><span class="tm">TM-3200S <b>79</b></span><span class="tm">IDL-400M <b>77</b></span><span class="tm">TP-8000 <b>73</b></span><span class="tm">UM-3500S <b>73</b></span><span class="tm">UN-3150S <b>72</b></span><span class="tm">NDL-PP11 <b>68</b></span><span class="tm">GT200 <b>67</b></span></div></section>
+
+<section id="s7"><h2 class="sh">7. 타사·관할 외 모델 이관</h2>
+<p style="font-size:13px">유니코/마스터즈/코콤 계열이 아닌 모델은 모델명 확인 후 해당사 안내.</p>
+<table class="t"><tr><th>구분</th><th>안내 연락처</th></tr>
+<tr><td>베스틴 / 베스트몰</td><td>1644-5303</td></tr>
+<tr><td>리모컨·기타 구매</td><td>1899-1309</td></tr></table>
+<h3 class="sub">보류·종결 유형</h3>
+<ul style="font-size:13px"><li><b>타사/잘못 연결:</b> 정확한 제조사·센터 안내 후 종결</li>
+<li><b>비용 미동의:</b> 견적만 제공, 닫힘(보류)·재연락 대기</li>
+<li><b>고객 부재/수신거부:</b> 메모 후 보류</li>
+<li><b>모델 미확인:</b> 사진 회신 대기 후 재접수</li></ul></section>
+
+<section id="s8"><h2 class="sh">8. 상황별 응대 스크립트 (대화 예시)</h2>
+<input class="search" id="scSearch" placeholder="🔍 상황 검색 (예: 비밀번호, 먹통, 클레임)" oninput="filterSc()">
+<div id="scList"><div class="sccard" data-name="8.1  9볼트 비상개문 안내 (외부 잠김)">
+      <h4>8.1  9볼트 비상개문 안내 (외부 잠김)</h4><div class="sc-sub">건전지 방전·키패드 불량으로 외부에서 문이 안 열릴 때</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">문이 안 열려요. 번호 누르려고 하면 화면이 떴다가 바로 꺼져버려요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">네, 건전지 방전이나 키패드 문제일 수 있습니다. 우선 비상 개문 먼저 도와드릴게요. 혹시 9V 건전지, 네모나게 생긴 사각 건전지 가지고 계실까요?</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">네, 하나 있어요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">그럼 도어락 외부 하단의 두 개 단자 부분에 9V 건전지를 접촉해서 그대로 대고 계세요. 접촉한 상태에서 비밀번호를 누르고 마지막에 별표(*)를 눌러 주시겠어요?</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">어, 화면 들어왔어요. … 열렸습니다!</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">다행입니다. 들어가시면 안쪽 건전지커버를 열고 알카라인 정품 건전지로 전체를 새것으로 교체해 주세요. 교체 후에도 같은 증상이 반복되면 키패드 고장일 수 있으니 다시 연락 주시면 기사님 방문 접수 도와드리겠습니다.</span></div></div></div><div class="sccard" data-name="8.2  9볼트로도 안 될 때 → 출동 접수">
+      <h4>8.2  9볼트로도 안 될 때 → 출동 접수</h4><div class="sc-sub">자가조치 실패 시 비용 사전고지 후 접수</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">9볼트도 해봤는데 반응이 아예 없어요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">네, 그러면 기기 자체 고장 가능성이 높아 기사님 방문이 필요합니다. 모델명 확인 도와드릴게요. 제품 측면이나 상단에 영문 모델명 보이시나요?</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">KDL-3250S 라고 적혀 있어요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">확인 감사합니다. 현장에서 9V로 개문만 되면 출장비 4만 원, 개문이 안 돼 파손 후 교체가 필요하면 18만 원에서 25만 원 정도 발생할 수 있습니다. 무상보증기간 내 기기 결함이면 무상으로 처리되지만, 건전지나 결로·습기, 사용 과실로 확인되면 비용이 발생할 수 있는 점 미리 안내드립니다. 접수 도와드릴까요?</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">네, 해주세요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">주소와 성함 말씀해 주시면, 담당 기사님이 영업일 기준 30분에서 1시간 이내 방문 예정이고 출발 전 미리 연락드립니다.</span></div></div></div><div class="sccard" data-name="8.3  비밀번호 분실 → 파손 후 교체 (긴급출동)">
+      <h4>8.3  비밀번호 분실 → 파손 후 교체 (긴급출동)</h4><div class="sc-sub">카드키·마스터키 미보유 시 개방수단 없음</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">비밀번호를 바꿨는데 잘못 입력했는지 문이 안 열려요. 집 안에 반려동물도 있어서 급해요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">많이 놀라셨겠어요. 혹시 카드키나 마스터키(공카드) 가지고 계신가요?</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">아니요, 둘 다 없어요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">네, 개방 수단이 없는 경우에는 안타깝지만 현장에서 기존 제품을 파손한 뒤 새 제품으로 교체하는 방법뿐입니다. 비용은 규격에 따라 21만 원에서 23만 원이고, 야간·주말 할증이 포함된 금액입니다. 진행해 드릴까요?</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">네, 빨리 부탁드려요. 결제는 카드로 되나요?</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">네, 현장에서 카드 결제나 계좌이체 중 편하신 방법으로 가능하고 현금영수증도 발행됩니다. 주소와 성함 확인되면 바로 접수하고, 기사님이 30분에서 1시간 이내 방문 예정입니다.</span></div></div></div><div class="sccard" data-name="8.4  자동잠금 안됨 → 자가조치 후 접수">
+      <h4>8.4  자동잠금 안됨 → 자가조치 후 접수</h4><div class="sc-sub">문 닫아도 안 잠김 / 안전잠금버튼 무반응</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">문을 닫아도 자동으로 안 잠겨요. 어제부터 그러네요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">네, 먼저 건전지를 알카라인 정품으로 전체 교체해 보시고, 자동잠금 설정을 다시 한 번 해보시겠어요? 그리고 안전잠금버튼을 눌렀을 때 걸쇠(데드볼트)가 나오는지 확인 부탁드립니다.</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">버튼 눌러도 아무 반응이 없어요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">안전잠금버튼에 반응이 없으면 내부 모티스나 기기 고장일 가능성이 높습니다. 방문 점검 접수 도와드릴게요. 도어락 자체 결함이면 무상이지만, 문틀 위치나 건전지·습기 문제로 확인되면 출장비 3만 원부터 발생할 수 있습니다. 내부 측면 시리얼(제조일) 사진을 문자로 보내주시면 더 정확히 조회됩니다.</span></div></div></div><div class="sccard" data-name="8.5  데드볼트 걸림 → 흔들기 임시조치">
+      <h4>8.5  데드볼트 걸림 → 흔들기 임시조치</h4><div class="sc-sub">잠금해제음은 나는데 문이 안 열림</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">비밀번호 누르면 열리는 소리는 나는데 문이 안 열려요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">걸쇠가 문틀에 살짝 걸린 상태일 수 있습니다. 비밀번호 누르고 별표(*)까지 누른 다음, 손잡이를 잡고 문을 앞뒤로 강하게 한 번 흔들면서 열어보시겠어요?</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">아, 흔드니까 열렸어요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">네, 임시로는 그렇게 여실 수 있는데 반복되면 모티스나 문틀 정렬 문제일 수 있습니다. 자주 발생하시면 방문 점검 접수 도와드릴게요. 모티스 교체는 7만 원부터이고, 도어락 결함이면 무상으로 처리됩니다.</span></div></div></div><div class="sccard" data-name="8.6  간헐적 소리음 → 건전지·영상 확인">
+      <h4>8.6  간헐적 소리음 → 건전지·영상 확인</h4><div class="sc-sub">건전지 교체에도 삐삐/멜로디 반복</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">도어락에서 자꾸 삐삐 소리랑 음악 소리가 나요. 건전지도 갈았는데 똑같아요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">정품 알카라인으로 전부 새것으로 교체하신 게 맞을까요? 망간이나 충전식이면 부족 경고음이 날 수 있어서요.</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">알카라인 새거 다 갈았는데도 그래요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">그렇다면 기기 점검이 필요합니다. 증상이 간헐적이라 기사님이 확인하시기 어려울 수 있어서, 소리 나는 상황을 짧게 영상으로 찍어 업무용 번호로 보내주시면 진단에 큰 도움이 됩니다. 점검 접수 함께 도와드릴게요. 수리는 15만 원 안팎, 노후로 교체 시 18만 원부터 안내되며 도어락 결함이면 무상입니다.</span></div></div></div><div class="sccard" data-name="8.7  외부터치 불량 → 리셋 후 접수">
+      <h4>8.7  외부터치 불량 → 리셋 후 접수</h4><div class="sc-sub">터치해도 숫자 안 뜸 / 되다 안 되다 함</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">밖에서 터치하면 숫자가 안 떠요. 될 때도 있고 안 될 때도 있고요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">우선 리셋 한 번 해보겠습니다. 기기 하단 일자형 돌출부 사이에 작은 구멍(리셋홀)이 있는데, 핀이나 옷핀으로 5초 정도 눌렀다 떼고, 건전지를 뺐다 다시 끼운 뒤 확인해 주시겠어요?</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">해봤는데 여전히 가끔 안 돼요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">간헐적으로 반복되면 외부 터치패드(PCB) 불량일 수 있어 방문 점검이 필요합니다. 접수 도와드릴게요. 수리 10만 원부터, 교체 18만 원에서 25만 원 선이며 도어락 결함이면 무상, 결로·습기·과실은 유상으로 안내됩니다.</span></div></div></div><div class="sccard" data-name="8.8  먹통 → 건전지·리셋·9v 순차 안내">
+      <h4>8.8  먹통 → 건전지·리셋·9V 순차 안내</h4><div class="sc-sub">불도 안 들어오고 완전 무반응</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">갑자기 완전 먹통이에요. 불도 안 들어오고 터치도 안 돼요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">순서대로 확인해 볼게요. 첫째, 안쪽 건전지를 정품 알카라인으로 전체 교체. 둘째, 하단 리셋홀을 핀으로 5초 눌렀다 떼기. 셋째, 외부 단자에 9V 건전지 접촉 후 비번+별표로 개문. 이 세 가지 먼저 시도해 보시겠어요?</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">다 해봤는데 아무 반응이 없어요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">그러면 기기 고장으로 보여 교체가 필요할 수 있습니다. 설치한 지 얼마 안 되셨다면 제품 불량으로 무상 점검 우선 진행되고, 보증 경과 시 교체는 25만 원 수준입니다. 모델명 확인 후 바로 접수 도와드릴게요.</span></div></div></div><div class="sccard" data-name="8.9  사용법 문의 — 마스터·지문 등록">
+      <h4>8.9  사용법 문의 — 마스터·지문 등록</h4><div class="sc-sub">등록버튼/지문 등록이 안 될 때</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">비밀번호를 바꾸려는데 등록이 안 돼요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">마스터(비밀번호) 등록은 반드시 문을 연 상태에서 하셔야 합니다. 건전지커버를 열고 등록버튼을 누른 다음, 새 번호를 입력하고 등록버튼을 다시 한 번 눌러 주세요.</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">아, 문 열고 하니까 되네요. 지문도 다시 등록하고 싶어요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">지문은 등록버튼을 누른 뒤, 같은 손가락을 인식부에 네 번 연속으로 댔다 떼시면 됩니다. 다 되면 등록버튼을 한 번 더 눌러 종료하시면 돼요. 참고로 공장 초기 비밀번호는 1234이고, 입력 후 별표(*)를 누르면 적용됩니다.</span></div></div></div><div class="sccard" data-name="8.10  부품 구매 — 건전지덮개">
+      <h4>8.10  부품 구매 — 건전지덮개</h4><div class="sc-sub">덮개가 자꾸 떨어질 때</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">건전지 덮개가 자꾸 떨어져요. 덮개만 살 수 있나요?</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">네, 덮개 단품으로 구매 가능하시고 가격은 13,000원입니다. 기존 플라스틱 파손 문제를 보완한 강화품으로 보내드려요. 설치하신 단지명과 동·호수, 그리고 파손 부위 사진을 문자로 보내주시겠어요?</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">네, 보낼게요. 입금은 어디로 하나요?</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">입금 계좌와 배송지, 입금자명을 문자로 발송해 드리겠습니다. 오늘 마감 이후 접수 건은 내일 발송됩니다.</span></div></div></div><div class="sccard" data-name="8.11  모델 미확인 → 사진 요청">
+      <h4>8.11  모델 미확인 → 사진 요청</h4><div class="sc-sub">고객이 모델명을 모를 때</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">도어락이 고장 난 것 같은데 모델명을 모르겠어요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">괜찮습니다. 정확한 안내를 위해 제품 측면이나 상단의 영문 모델명, 또는 옆면 KC 인증 스티커를 사진으로 찍어 이 번호로 문자 보내주시겠어요? 확인 후 바로 다시 연락드리겠습니다.</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">네, 지금 보낼게요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">감사합니다. 사진 확인되는 대로 증상에 맞는 처리 방법과 비용 안내해 드리겠습니다.</span></div></div></div><div class="sccard" data-name="8.12  미연락 독촉 클레임 응대">
+      <h4>8.12  미연락 독촉 클레임 응대</h4><div class="sc-sub">접수했는데 기사 연락이 없을 때</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">어제 AS 접수했는데 기사님한테 연락이 하나도 없어요. 이런 식이면 곤란하죠.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">연락이 늦어져 불편을 드려 정말 죄송합니다. 바로 접수 상태 확인하겠습니다. … 확인되었고, 담당 기사님께 즉시 전달해서 최대한 빨리 연락드리도록 조치하겠습니다.</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">오늘 안에는 됩니까?</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">네, 담당 기사님이 직접 방문 시간 조율해서 연락드릴 수 있도록 우선으로 처리하겠습니다. 다시 한 번 불편 드려 죄송합니다.</span></div></div></div><div class="sccard" data-name="8.13  타사·관할 외 모델 이관">
+      <h4>8.13  타사·관할 외 모델 이관</h4><div class="sc-sub">유니코 계열이 아닌 제품 문의</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">MTR-701 모델인데 비밀번호 설정 좀 알려주세요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">확인해 보니 말씀하신 모델은 저희 센터 관할이 아니라 베스틴 제품입니다. 해당 제품은 베스트몰 고객센터 1644-5303으로 문의하시면 정확한 안내를 받으실 수 있습니다.</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">아, 거기로 하면 되는 거죠?</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">네, 맞습니다. 도움 드리지 못해 죄송하고, 혹시 유니코 제품 관련해서 또 궁금한 점 있으시면 언제든 연락 주세요.</span></div></div></div><div class="sccard" data-name="8.14  무상·유상 판정 안내">
+      <h4>8.14  무상·유상 판정 안내</h4><div class="sc-sub">보증기간·결로 등 비용 발생 사유 설명</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">이거 무상으로 고쳐주는 거 맞죠? 산 지 얼마 안 됐는데요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">네, 무상보증기간 내에 도어락 기기 자체 결함으로 확인되면 무상으로 처리됩니다. 다만 결로나 습기로 인한 고장, 건전지 문제, 문·문틀 유격이나 사용 과실로 확인되는 경우에는 출장비나 수리비가 발생할 수 있습니다.</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">그건 가서 봐야 아는 거네요?</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">맞습니다. 기사님이 현장에서 점검 후 원인을 확인하고, 비용이 발생하는 경우 작업 전에 먼저 안내드린 뒤 진행합니다. 동의 없이 비용 처리되는 일은 없으니 안심하셔도 됩니다.</span></div></div></div><div class="sccard" data-name="8.15  실내 갇힘 긴급 상황">
+      <h4>8.15  실내 갇힘 긴급 상황</h4><div class="sc-sub">안에서 문이 안 열려 갇혔을 때</div><div class="dlg"><div class="dl c"><span class="rl">고객</span><span class="tx">안에서 문이 안 열려요. 손잡이를 밀어도 반만 열리고… 갇혔어요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">당황하셨겠지만 침착하게 해보겠습니다. 도어락 몸통을 한 손으로 잡고 문 쪽으로 당기거나 밀면서, 동시에 안전잠금버튼을 눌러 개방을 시도해 보시겠어요?</span></div><div class="dl c"><span class="rl">고객</span><span class="tx">어… 몇 번 하니까 열렸어요.</span></div><div class="dl s"><span class="rl">상담사</span><span class="tx">다행입니다. 안에서 안 열리는 건 모티스 불량 가능성이 높아 안전상 점검이 필요합니다. 긴급으로 방문 접수해 드릴게요. 모티스 교체는 7만 원부터이고 도어락 결함이면 무상입니다. 갇힘 위험이 있는 만큼 우선으로 배정하겠습니다.</span></div></div></div></div><div class="empty" id="scEmpty" style="display:none">검색 결과 없음</div></section>
+
+</div>
+<script>
+function filterCat(){const q=document.getElementById('catSearch').value.toLowerCase().trim();let n=0;
+document.querySelectorAll('#catList .ccard').forEach(c=>{const v=!q||c.dataset.name.includes(q);c.style.display=v?'':'none';if(v)n++;});
+document.getElementById('catEmpty').style.display=n?'none':'block';}
+function filterSc(){const q=document.getElementById('scSearch').value.toLowerCase().trim();let n=0;
+document.querySelectorAll('#scList .sccard').forEach(c=>{const v=!q||c.dataset.name.includes(q);c.style.display=v?'':'none';if(v)n++;});
+document.getElementById('scEmpty').style.display=n?'none':'block';}
+</script></body></html>
