@@ -31,50 +31,45 @@ function AppRoute() {
   const { guide, sections } = data;
 
   return (
-    <div style={{ minHeight: "100vh", padding: 16, maxWidth: 960, margin: "0 auto" }}>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ margin: 0, fontSize: 28 }}>APP 연동방법</h1>
-        <p style={{ margin: "10px 0 0", color: "#555", fontSize: 15 }}>
-          SMART UNICOR 앱 설치부터 도어락 등록, 아이콘/퀵 오픈/위젯/스마트패스/브릿지 연동까지 한 번에 확인하세요.
-        </p>
+    <div className="uni-wrap">
+      <div className="hd">
+        <div className="brand">UPHELP · 앱 매뉴얼</div>
+        <div className="eyebrow">SMART UNICOR 앱 · 도어락 등록 · 동작 모드</div>
+        <h1 style={{ margin: "10px 0 0", fontSize: 32 }}>APP 연동방법</h1>
+        <div className="desc">스마트폰 앱 설치부터 도어락 등록, 아이콘·퀵 오픈·위젯·스마트패스·브릿지 사용법까지 한 번에 확인하세요.</div>
       </div>
 
-      <section style={{ marginBottom: 28 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <div style={{ fontSize: 13, color: "#222", fontWeight: 700 }}>{guide.series}</div>
-          <div style={{ fontSize: 14, color: "#555" }}>{guide.eyebrow}</div>
-          {guide.description && <div style={{ color: "#666", marginTop: 8 }}>{guide.description}</div>}
-        </div>
-      </section>
+      <div className="sec">
+        <div className="lbl">제품 정보</div>
+        <h3>{guide.series}</h3>
+        <p style={{ margin: 0, color: "var(--sub)", lineHeight: 1.8 }}>{guide.eyebrow}</p>
+        {guide.description && <p style={{ marginTop: 10, color: "var(--sub)", lineHeight: 1.8 }}>{guide.description}</p>}
+      </div>
 
       {guide.quick_card.length > 0 && (
-        <section style={{ marginBottom: 24 }}>
-          <h2 style={{ margin: 0, fontSize: 20 }}>빠른 정보</h2>
-          <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
+        <div className="quick">
+          <h2>빠른 정보</h2>
+          <div className="qgrid">
             {guide.quick_card.map((card, index) => (
-              <div key={index} style={{ background: "#fff", border: "1px solid #e2e8eb", borderRadius: 12, padding: 14 }}>
-                <div style={{ fontSize: 12, color: "#777", marginBottom: 4 }}>{card.k}</div>
-                <div style={{ fontSize: 14, color: "#1f3340" }}>{card.v}</div>
+              <div key={index} className="cell">
+                <div className="k">{card.k}</div>
+                <div className="v">{card.v}</div>
               </div>
             ))}
           </div>
-          {guide.quick_note && <div style={{ marginTop: 12, fontSize: 13, color: "#555" }}>{guide.quick_note}</div>}
-        </section>
+          {guide.quick_note && <div className="note">{guide.quick_note}</div>}
+        </div>
       )}
 
       {sections.map((section) => (
-        <article key={section.id} style={{ marginBottom: 26, background: "#fff", border: "1px solid #e2e8eb", borderRadius: 14, padding: 20, boxShadow: "0 1px 4px rgba(15, 23, 42, .05)" }}>
-          <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 13, color: "#8a99a6", fontWeight: 700 }}>{section.label}</span>
-            <h2 style={{ margin: 0, fontSize: 18 }}>{section.title}</h2>
-          </div>
+        <div key={section.id} className="sec">
+          <div className="lbl">{section.label}</div>
+          <h3>{section.title}</h3>
           <div dangerouslySetInnerHTML={{ __html: section.body_html }} />
-        </article>
+        </div>
       ))}
 
-      <Link to="/" style={{ display: "inline-block", marginTop: 12, color: "#0f62fe", textDecoration: "underline" }}>
-        ← 전체 모델 목록으로 돌아가기
-      </Link>
+      <Link className="back" to="/">← 전체 모델 목록으로 돌아가기</Link>
     </div>
   );
 }
